@@ -1,0 +1,2716 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  CheckCircle2, 
+  XCircle, 
+  ChevronLeft, 
+  ChevronRight, 
+  Trophy, 
+  BookOpen, 
+  RotateCcw,
+  Filter,
+  Check,
+  AlertCircle
+} from 'lucide-react';
+
+// Dữ liệu 200 câu hỏi với đáp án chuẩn được trích xuất từ tài liệu học phần
+const QUESTIONS_DATA = [
+  // CHƯƠNG 1 (Câu 1 - 32)
+  {
+    id: 1,
+    chapter: 1,
+    text: "Với tài khoản AI văn phòng do nhà trường hoặc công ty cấp, loại dữ liệu nào được khuyến cáo KHÔNG nên đưa vào xử lý?",
+    options: {
+      a: "Bài tập và đồ án môn học do chính người dùng thực hiện trong chương trình đào tạo",
+      b: "Ghi chú cá nhân về lịch học và lịch thi của bản thân trong học kỳ đang diễn ra",
+      c: "Dữ liệu cá nhân nhạy cảm của riêng mình như hồ sơ y tế, hồ sơ tài chính cá nhân",
+      d: "Tài liệu công khai đã được nhà trường đăng tải trên công thông tin điện tử chính thức"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 2,
+    chapter: 1,
+    text: "Câu lạc bộ học thuật muốn xây hệ thống tự trả lời câu hỏi thường gặp của tân sinh viên: cần một nền tảng kết nối các bước, một thành phần ra quyết định phân loại câu hỏi, và một thành phần soạn nội dung trả lời. Theo cách ba lớp công nghệ AI tạo sinh, AI agent và nền tảng no-code thường kết hợp với nhau, cách phân vai nào là đúng?",
+    options: {
+      a: "AI tạo sinh làm khung kết nối, nền tảng no-code ra quyết định phân loại, Al agent soạn nội dung trả lời",
+      b: "Nền tảng no-code làm khung kết nối, AI tạo sinh ra quyết định phân loại, Al agent soạn nội dung trả lời",
+      c: "Nền tảng no-code làm khung kết nối. Al agent ra quyết định phân loại, AI tạo sinh soạn nội dung trả lời",
+      d: "AI agent làm khung kết nối, AI tạo sinh ra quyết định phân loại, nền tảng no-code soạn nội dung trả lời"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 3,
+    chapter: 1,
+    text: "Một sinh viên dùng một địa chỉ email duy nhất cho: đăng ký học phần, nhận thư tuyển dụng, đăng ký các bản dùng thử công cụ AI, và đăng nhập diễn đàn game. Khi hộp thư bị lộ trong một vụ rò rỉ dữ liệu của diễn đàn, hệ quả nghiêm trọng nhất về mặt quản lý danh tính là gì?",
+    options: {
+      a: "Không ảnh hưởng tới các tài khoản khác, vì mỗi dịch vụ đã được đặt một mật khẩu riêng",
+      b: "Nhà trường khoá tài khoản học vụ của sinh viên, vì email đã xuất hiện trong vụ rò rỉ",
+      c: "Hộp thư nhận thêm nhiều thư rác mỗi ngày, vì địa chỉ đã nằm trong danh sách bị rò rỉ",
+      d: "Dịch vụ yếu nhất quyết định an toàn của hồ sơ học tập, vì mọi vai trò chung một định danh"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 4,
+    chapter: 1,
+    text: "Một sinh viên ngành Báo chí cần portfolio chủ yếu gồm các bài viết bổ sung hằng tuần, với ngân sách hạn chế. Trước nhiều công cụ dựng portfolio trên thị trường, cách lập luận chọn công cụ nào là đúng?",
+    options: {
+      a: "Chọn công cụ mà giảng viên hoặc bạn bè xung quanh quen dùng nhất, để khi gặp lỗi có thể nhờ hướng dẫn lại thao tác.",
+      b: "Chọn công cụ có nhiều tính năng thiết kế đồ hoạ nhất, vì tính năng càng nhiều thì portfolio càng gây được ấn tượng.",
+      c: "Chọn công cụ đang được nhiều người dùng nhất trên thị trường, vì độ phổ biến bảo đảm phù hợp với mọi loại nhu cầu.",
+      d: "Xác định yêu cầu cốt lõi (chỉnh sửa nhanh, quản lý bài viết, chi phí thấp) rồi đối chiếu với đặc tính từng công cụ."
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 5,
+    chapter: 1,
+    text: "Một sinh viên dùng tài khoản Facebook cá nhân để nộp bài tập nhóm cho giảng viên và dùng luôn email do trường cấp để đăng ký các diễn đàn giải trí. Rủi ro chính của thói quen dùng chung tài khoản cho mọi vai trò này là gì?",
+    options: {
+      a: "Thông tin giữa các vai trò bị trộn lẫn khiến hình ảnh chuyên nghiệp bị ảnh hưởng và tăng nguy cơ lộ thông tin",
+      b: "Các diễn đàn giải trí sẽ tự động thu thập danh sách bạn bè và bài đăng từ tài khoản Facebook cá nhân",
+      c: "Nhà trường sẽ ra quyết định xử lý kỷ luật vì email trường chỉ được cấp phép sử dụng cho mục đích học tập chính thức",
+      d: "Tài khoản Facebook sẽ bị nền tảng khoá do đăng nhập từ nhiều dịch vụ bên ngoài trong thời gian ngắn"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 6,
+    chapter: 1,
+    text: "Một sinh viên tạo tài liệu trên laptop nhưng chờ mãi không thấy tài liệu xuất hiện trong ứng dụng lưu trữ đám mây trên điện thoại. Theo kinh nghiệm xử lý sự cố đồng bộ, điều cần kiểm tra trước tiên là gì?",
+    options: {
+      a: "Dung lượng lưu trữ miễn phí của tài khoản còn trống bao nhiêu phần",
+      b: "Hai thiết bị đã đăng nhập đúng cùng một tài khoản đám mây hay chưa",
+      c: "Điện thoại đã được cập nhật lên phiên bản hệ điều hành mới nhất chưa",
+      d: "Tài liệu đã được đổi sang định dạng tương thích với di động hay chưa"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 7,
+    chapter: 1,
+    text: "Ban chủ nhiệm một câu lạc bộ định cho AI agent tự động gửi thẳng email trả lời mọi thắc mắc của tân sinh viên để tiết kiệm thời gian. Dựa trên nguyên tắc triển khai an toàn được rút ra từ các dự án tự động hoá trả lời khách hàng bằng AI agent, điều chỉnh nào là cần thiết trước khi triển khai?",
+    options: {
+      a: "Tăng độ dài của email trả lời để AI có thêm không gian giải thích cho những trường hợp khó",
+      b: "Chuyển các câu hỏi sang dạng biểu mẫu có sẵn trường thông tin để AI đọc chính xác hơn",
+      c: "Thêm bước để người phụ trách duyệt bản nháp trước khi hệ thống gửi email đi",
+      d: "Giới hạn hệ thống chỉ hoạt động vào giờ hành chính để dễ theo dõi sự cố"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 8,
+    chapter: 1,
+    text: "Một sinh viên chạy cùng một yêu cầu hai lần và nhận được hai bản trả lời: bản một viết \"khoảng một phần ba\", bản hai viết \"xấp xỉ 33%\"; ngoài ra bản một ghi mốc năm 2024 còn bản hai ghi 2022. Cách xử lý đúng với hai loại khác biệt này là gì?",
+    options: {
+      a: "Cả hai khác biệt đều cho thấy công cụ không đáng tin, nên bỏ cả hai bản và làm lại hoàn toàn bằng cách tra cứu thủ công",
+      b: "Khác biệt cách diễn đạt con số thì bỏ qua được, còn khác biệt về mốc năm là khác biệt dữ kiện nên phải tra lại nguồn gốc",
+      c: "Cả hai khác biệt đều nằm trong sai số cho phép của công cụ, nên chọn bản nào đọc mạch lạc hơn để đưa vào bài",
+      d: "Chạy thêm lần thứ ba rồi lấy nội dung nào xuất hiện ở hai trong ba lần, vì đó là nội dung có độ lặp cao nhất"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 9,
+    chapter: 1,
+    text: "Một sinh viên ngành Logistics lập kế hoạch phát triển năng lực số mười hai tuần, trong đó mỗi mốc kiểm tra phải gắn với một sản phẩm cụ thể đo được để tự kiểm chứng tiến bộ. Mốc kiểm tra nào cho giai đoạn tuần 4–6 đáp ứng đúng yêu cầu đó?",
+    options: {
+      a: "Dành mỗi tuần ba buổi tối để đọc thêm tài liệu về ứng dụng AI trong ngành logistics.",
+      b: "Hoàn thành một bảng theo dõi đơn hàng mẫu có công thức xử lý số liệu bằng AI.",
+      c: "Cảm thấy tự tin hơn khi sử dụng các công cụ bảng tính phục vụ môn chuyên ngành.",
+      d: "Cố gắng nâng trình độ ở miền dữ liệu và thông tin lên mức cao hơn hiện tại của mình."
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 10,
+    chapter: 1,
+    text: "Điện thoại của một sinh viên bị mất trên xe buýt. Trước đó sinh viên này đã bật sao lưu ảnh từ đầu học kỳ, soạn một tài liệu Google Docs khi máy đang có mạng, ghi vài ý tưởng vào một ứng dụng ghi chú không có tính năng đồng bộ, và nhận nhiều tin nhắn SMS xác nhận đơn hàng. Theo cơ chế đồng bộ đám mây, dữ liệu nào chắc chắn lấy lại được khi đăng nhập trên thiết bị khác?",
+    options: {
+      a: "Tin nhắn SMS xác nhận đơn hàng, vì nhà mạng lưu bản sao cho thuê bao",
+      b: "Tài liệu Google Docs và các ảnh đã bật sao lưu từ đầu học kỳ",
+      c: "Các ý tưởng trong ứng dụng ghi chú, vì ứng dụng tải từ tài khoản Google",
+      d: "Toàn bộ dữ liệu trong máy, vì thiết bị đã đăng nhập một tài khoản Google"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 11,
+    chapter: 1,
+    text: "Khi bàn về danh tính số, hồ sơ số cá nhân được ví như \"bộ đồng phục\" lúc một người xuất hiện trước giảng viên, nhà tuyển dụng hay đối tác trên môi trường trực tuyến. Phép so sánh này nhằm diễn đạt ý nào?",
+    options: {
+      a: "Hồ sơ số tạo ấn tượng đầu tiên với người khác trước cả khi họ gặp mặt trực tiếp.",
+      b: "Hồ sơ số cần được thay đổi giao diện thường xuyên giống như việc thay trang phục theo mùa.",
+      c: "Hồ sơ số phải tuân theo một mẫu trình bày thống nhất do nhà trường ban hành cho sinh viên.",
+      d: "Hồ sơ số nên hạn chế thể hiện cá tính riêng để trông giống với hồ sơ của số đông ứng viên."
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 12,
+    chapter: 1,
+    text: "Hướng dẫn thực hành trình bày mỗi bước theo bốn thành phần NHẬP – CHỌN – KIỂM TRA – DẤU HIỆU ĐẠT và dặn người học không chuyển sang bước tiếp theo khi chưa thấy \"dấu hiệu đạt\". Vì sao có lời dặn này?",
+    options: {
+      a: "Vì hệ thống của các công cụ sẽ tự khoá bước sau cho tới khi bước trước được xác nhận xong.",
+      b: "Vì mỗi bước thực hành yêu cầu đăng nhập bằng một tài khoản riêng nên phải làm lần lượt.",
+      c: "Vì giảng viên chấm điểm quá trình dựa trên thời gian dừng lại của từng bước thực hành.",
+      d: "Vì lỗi chưa được xử lý ở bước trước sẽ nhân đôi ảnh hưởng khi tiếp tục sang bước sau."
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 13,
+    chapter: 1,
+    text: "Một sinh viên năm nhất băn khoăn nên đầu tư thời gian thế nào khi các công cụ AI liên tục ra mắt, đổi tên và thay đổi tính năng. Cách đầu tư hợp lý nhất là gì?",
+    options: {
+      a: "Chờ tới năm cuối mới bắt đầu học công cụ, vì khi đó thị trường đã ổn định và ít thay đổi hơn",
+      b: "Cài và thử càng nhiều công cụ càng tốt để nắm được các công cụ mới vừa xuất hiện trên thị trường",
+      c: "Nắm chắc nguyên lý và tiêu chí chọn công cụ, thành thạo một công cụ đại diện cho mỗi nhóm chức năng",
+      d: "Chọn một công cụ đang phổ biến nhất rồi học thật sâu và gắn bó lâu dài với công cụ đó khi đi làm"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 14,
+    chapter: 1,
+    text: "Một sinh viên nhờ AI soạn phần giới thiệu bản thân (bio) cho hồ sơ trực tuyến và phát hiện AI tự thêm chi tiết \"đạt học bổng\" dù bản thân không hề cung cấp thông tin này. Vì sao điều đó xảy ra?",
+    options: {
+      a: "Vì AI được mặc định thêm các thành tích nổi bật nhằm tăng lượt xem cho hồ sơ trực tuyến.",
+      b: "Vì AI lấy nhầm dữ liệu từ hồ sơ của một người dùng khác có tên trùng với người yêu cầu.",
+      c: "Vì bản miễn phí của công cụ tự chèn nội dung mẫu quảng cáo vào các đoạn văn được tạo ra.",
+      d: "Vì hiện tượng ảo giác khiến AI cố làm đầy câu văn khi thiếu dữ kiện thật từ người dùng."
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 15,
+    chapter: 1,
+    text: "Tại thời điểm 2025-2026, Gemini đã có sẵn trong gói Workspace còn Copilot phải mua thêm. Một sinh viên dựa vào đó lập luận rằng tổ chức nào cũng nên chuyển sang Google Workspace. Điểm thiếu sót của lập luận này là gì?",
+    options: {
+      a: "Microsoft 365 không có bất kỳ tính năng AI nào tích hợp trong các ứng dụng văn phòng.",
+      b: "Lựa chọn còn phụ thuộc hạ tầng mà tổ chức đang dùng và chi phí chuyển đổi kèm theo.",
+      c: "Gemini thực chất vẫn phải mua bổ sung như một tiện ích riêng nằm ngoài gói Workspace.",
+      d: "Giá của hai nền tảng được công bố bằng hai loại tiền tệ nên không thể so sánh với nhau."
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 16,
+    chapter: 1,
+    text: "Năng lực số (digital competence) được định nghĩa là gì?",
+    options: {
+      a: "Khả năng sử dụng thành thạo nhiều ứng dụng mạng xã hội khác nhau để giao tiếp và giải trí trong đời sống hằng ngày",
+      b: "Khả năng dùng thiết bị, phần mềm và dữ liệu số hiệu quả, an toàn, có trách nhiệm để học tập, làm việc và tham gia đời sống xã hội",
+      c: "Khả năng viết mã lập trình để tự xây dựng các phần mềm và ứng dụng phục vụ cho việc học tập, làm việc chuyên môn của bản thân mình",
+      d: "Kiến thức chuyên sâu về cấu tạo phần cứng máy tính và cách khắc phục các sự cố kỹ thuật của những thiết bị công nghệ"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 17,
+    chapter: 1,
+    text: "Một sinh viên đã điền đủ ảnh, headline, phần About và học vấn trên LinkedIn, nhưng người xem thử vẫn không nói được sinh viên đó học ngành gì sau mười giây. Nguyên nhân nhiều khả năng nhất là gì?",
+    options: {
+      a: "Hồ sơ còn thiếu một trong bốn mục tối thiểu nên người xem không có đủ thông tin.",
+      b: "Người xem chưa có tài khoản LinkedIn nên chỉ nhìn thấy được một phần nội dung hồ Sơ.",
+      c: "Nội dung các mục còn chung chung, chưa nêu rõ ngành học và mối quan tâm cụ thể.",
+      d: "Ảnh đại diện chưa được chụp tại phòng chụp chuyên nghiệp nên thiếu tính thuyết phục."
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 18,
+    chapter: 1,
+    text: "Tài liệu tạo trên laptop hiển thị đúng khi mở drive.google.com trên điện thoại, nhưng không xuất hiện trong ứng dụng Drive của máy đó dù mạng ổn định và đã đăng nhập đúng tài khoản. Nguyên nhân còn lại cần kiểm tra là gì?",
+    options: {
+      a: "Hai thiết bị đang chạy hai hệ điều hành khác nhau nên dữ liệu không thể đồng bộ với nhau.",
+      b: "Tài liệu được tạo bằng Google Docs nên chỉ mở được trên trình duyệt của máy tính.",
+      c: "Quyền đồng bộ nền của ứng dụng Drive trên điện thoại chưa được bật trong cài đặt máy.",
+      d: "Dung lượng đám mây của tài khoản đã đầy nên tài liệu mới chỉ được lưu trên máy tính."
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 19,
+    chapter: 1,
+    text: "Danh tính số (digital identity) được định nghĩa là gì?",
+    options: {
+      a: "Tài khoản định danh điện tử do cơ quan nhà nước cấp cho công dân nhằm thực hiện các thủ tục hành chính trên môi trường mạng internet",
+      b: "Tập hợp thông tin đại diện cho một người trên môi trường số: email, tên hiển thị, ảnh đại diện, hồ sơ nghề nghiệp, portfolio",
+      c: "Toàn bộ những dấu vết mà một người để lại khi hoạt động trên internet như bài đăng, bình luận và các bức ảnh được gắn thẻ",
+      d: "Bộ thông tin đăng nhập gồm tên tài khoản và mật khẩu mà một người sử dụng để truy cập vào các dịch vụ trực tuyến khác nhau"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 20,
+    chapter: 1,
+    text: "Một sinh viên tải bộ số liệu khảo sát từ một diễn đàn, đưa nguyên vào báo cáo mà không kiểm tra ai thu thập và thu thập thế nào; sau đó bị hội đồng bác kết quả. Nếu phải quy trách nhiệm cho MỘT miền năng lực số cần bồi dưỡng trước, đó là miền nào và vì sao?",
+    options: {
+      a: "Miền Sáng tạo nội dung số, vì lỗi nằm ở cách trình bày báo cáo chưa thuyết phục hội đồng",
+      b: "Miền An toàn thông tin, vì tải tệp số liệu từ một diễn đàn là hành vi có rủi ro bảo mật",
+      c: "Miền Ứng dụng trí tuệ nhân tạo, vì dùng AI kiểm tra số liệu thì đã phát hiện được sai sót",
+      d: "Miền Khai thác dữ liệu và thông tin, vì khâu thất bại là thẩm định nguồn trước khi dùng"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 21,
+    chapter: 1,
+    text: "Ảo giác AI (hallucination) là hiện tượng gì?",
+    options: {
+      a: "AI tạo sinh tự tin đưa ra thông tin, số liệu hoặc chi tiết không có thật hoặc không được cung cấp",
+      b: "AI tạo sinh cho ra hai kết quả có câu chữ khác nhau khi chạy cùng một câu lệnh ở hai thời điểm",
+      c: "AI tạo sinh từ chối trả lời các câu hỏi nằm ngoài phạm vi dữ liệu đã được huấn luyện trước đó",
+      d: "AI tạo sinh phản hồi chậm hoặc gián đoạn khi hệ thống máy chủ bị quá tải trong giờ cao điểm"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 22,
+    chapter: 1,
+    text: "Một sinh viên tự chấm rubric thấy phần lớn miền ở bậc 1–2 và kết luận rằng mình không đủ nền tảng để theo học học phần này. Sai lầm trong suy luận đó là gì?",
+    options: {
+      a: "Bậc thấp chỉ cho biết vị trí xuất phát, đồng thời là dư địa để tiến bộ nhanh nhất.",
+      b: "Kết quả tự chấm phải được giảng viên phê duyệt thì mới phản ánh đúng trình độ thật sự.",
+      c: "Bậc thấp cho thấy sinh viên đã bỏ sót phần lớn nội dung của các chương học trước đó.",
+      d: "Rubric chỉ dùng cho người đã đi làm nên kết quả của sinh viên năm nhất không có giá trị."
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 23,
+    chapter: 1,
+    text: "Một giám đốc lập luận: quy trình chăm sóc khách hàng đã giảm thời gian xử lý từ 25-30 phút xuống 5-7 phút nhờ AI agent, vậy nên cắt giảm ngay phần lớn nhân sự của bộ phận. Phát biểu nào bác bỏ trực tiếp bước suy rộng từ tiết kiệm thời gian sang cắt giảm nhân sự này?",
+    options: {
+      a: "Các nền tảng no-code như Zapier và n8n đều có gói miễn phí nên rào cản chi phí đang giảm dần theo thời gian",
+      b: "Chi phí bản quyền của các nền tảng AI agent no-code hiện vẫn quá cao so với ngân sách của doanh nghiệp vừa",
+      c: "Thời gian xử lý trung bình là chỉ số duy nhất đáng tin cậy để đánh giá hiệu quả của toàn bộ việc triển khai AI agent",
+      d: "AI agent xoá bỏ phần lặp lại của công việc, còn phần ra quyết định và xử lý ngoại lệ trở thành phần quan trọng nhất"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 24,
+    chapter: 1,
+    text: "Đám mây (cloud) trong lưu trữ và xử lý dữ liệu được hiểu là gì?",
+    options: {
+      a: "Việc lưu trữ dữ liệu trên ổ cứng máy tính cá nhân kèm theo cơ chế mã hoá mạnh để bảo đảm an toàn cho thông tin người dùng",
+      b: "Việc lưu trữ và xử lý dữ liệu trên máy chủ ở xa, truy cập được từ nhiều thiết bị qua internet thay vì chỉ lưu trên ổ cứng",
+      c: "Loại phần mềm văn phòng được cài đặt sẵn trên máy tính và có thể hoạt động ổn định khi không có kết nối internet",
+      d: "Hệ thống mạng nội bộ của một tổ chức cho phép các máy tính trong cùng toà nhà chia sẻ tập tin trực tiếp với nhau qua dây mạng"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 25,
+    chapter: 1,
+    text: "Một sinh viên muốn nhà tuyển dụng tìm thấy mình dễ dàng, nhưng cũng không muốn người lạ biết nơi ở và lịch sinh hoạt của mình. Cách giải quyết đánh đổi này hợp lý nhất là gì?",
+    options: {
+      a: "Công khai cả hồ sơ lẫn đời sống riêng cho nhà tuyển dụng dễ tìm, vì thông tin cá nhân giúp hồ sơ trông chân thực hơn",
+      b: "Công khai phần về năng lực và sản phẩm, đóng phần về đời sống riêng, vì hai phần phục vụ hai mục đích khác nhau",
+      c: "Đóng kín hồ sơ và chỉ gửi riêng khi có người yêu cầu, vì như vậy kiểm soát được ai đọc được thông tin gì",
+      d: "Công khai hồ sơ nhưng dùng tên viết khác đi, vì đổi tên thì người lạ khó lần ra được thông tin đời sống"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 26,
+    chapter: 1,
+    text: "Bio LinkedIn của một sinh viên bị bạn bè nhận xét không giống văn phong thường ngày, đồng thời có chi tiết về học bổng mà sinh viên chưa từng đạt. Nguyên nhân gốc chung của cả hai dấu hiệu là gì?",
+    options: {
+      a: "Prompt được viết quá dài nên công cụ AI hiểu nhầm phần thông tin cá nhân đưa vào.",
+      b: "Bản nháp do AI tạo ra đã được đăng khi chưa qua bước tự kiểm tra và biên tập lại.",
+      c: "Tài khoản LinkedIn chưa được xác minh danh tính nên nội dung hiển thị bị sai lệch.",
+      d: "Sinh viên đã chọn nhầm mẫu hồ sơ nên phần giới thiệu bị lấy từ hồ sơ của người khác."
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 27,
+    chapter: 1,
+    text: "Một sinh viên muốn tách các tài khoản số theo ba vai trò: học tập, nghề nghiệp và cá nhân. Cách phân chia nào đúng với khuyến nghị thực hành tốt?",
+    options: {
+      a: "Email cá nhân cho việc học và email trường cho mạng xã hội, vì email trường có lớp bảo mật của nhà trường",
+      b: "Một địa chỉ email dùng cho cả ba vai trò nhưng đặt mật khẩu thật mạnh, vì ít tài khoản thì đỡ nguy cơ bị lộ thông tin",
+      c: "Email trường cho việc học và công cụ chuyên môn; hồ sơ nghề nghiệp riêng; mạng xã hội cá nhân để chế độ riêng tư",
+      d: "Một địa chỉ email riêng cho từng nền tảng đang dùng, để dữ liệu giữa các nền tảng không bị liên kết với nhau"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 28,
+    chapter: 1,
+    text: "Phần thảo luận \"Hồ sơ số: tài sản hay rủi ro?\" chỉ ra sự đánh đổi thực sự nằm giữa hai yếu tố nào?",
+    options: {
+      a: "Số lượng nền tảng tham gia cùng một lúc và dung lượng lưu trữ được cấp trên mỗi nền tảng.",
+      b: "Thời gian dành cho việc đăng bài hằng ngày và số lượng người theo dõi trang cá nhân.",
+      c: "Chi phí duy trì các tài khoản trả phí và chất lượng hình ảnh hiển thị trên trang hồ sơ.",
+      d: "Mức độ hiển thị để cơ hội tìm đến người học và mức độ riêng tư để bảo vệ bản thân."
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 29,
+    chapter: 1,
+    text: "Khung năng lực số Việt Nam tham chiếu một khung quốc tế đã có thay vì xây dựng hoàn toàn mới. Lợi ích chính của cách làm này là gì?",
+    options: {
+      a: "Khung quốc tế cho người học được công nhận năng lực số qua chứng chỉ quốc tế, không cần đánh giá trong nước",
+      b: "Kết quả đánh giá năng lực số so sánh và quy đổi được với hệ thống quốc tế, không chỉ có giá trị trong nước",
+      c: "Khung quốc tế buộc các trường trong nước dùng chung một bộ công cụ khi đánh giá năng lực số của người học",
+      d: "Khung quốc tế đã có sẵn nên chỉ cần dịch sang tiếng Việt, nhờ đó tiết kiệm chi phí xây dựng khung riêng"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 30,
+    chapter: 1,
+    text: "Klarna công bố kết quả cải thiện rõ rệt về chi phí và thời gian phản hồi sau khi triển khai trợ lý AI trong chăm sóc khách hàng. Một tổ chức muốn đạt kết quả tương tự được khuyến nghị bắt đầu như thế nào?",
+    options: {
+      a: "Chờ đến khi có công cụ AI không còn mắc lỗi rồi mới triển khai để tránh rủi ro gây sai sót.",
+      b: "Áp dụng đồng loạt cho các quy trình chăm sóc khách hàng ngay từ đầu để sớm thu được lợi ích.",
+      c: "Bắt đầu từ một quy trình nhỏ, đo lường được, kiểm chứng hiệu quả trước khi mở rộng.",
+      d: "Bỏ khâu nhân viên duyệt bản nháp ngay từ đầu để rút ngắn thêm thời gian phản hồi khách hàng."
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 31,
+    chapter: 1,
+    text: "Trước khi gửi link portfolio cho nhà tuyển dụng, một sinh viên muốn chắc chắn hồ sơ hiển thị đúng với người ngoài. Theo nguyên tắc kiểm tra hồ sơ bằng con mắt người lạ, cách kiểm tra phù hợp là gì?",
+    options: {
+      a: "Mở link bằng chính tài khoản của mình trên nhiều trình duyệt máy tính khác nhau để so sánh cách hiển thị",
+      b: "Mở link bằng cửa sổ ẩn danh và nhờ một người bạn xem trong đúng 10 giây để kiểm tra mức độ dễ hiểu",
+      c: "Rà lại từng trang trong trình chỉnh sửa của công cụ vì đây là nơi xem được đầy đủ nội dung nhất",
+      d: "Gửi link vào nhóm lớp và chờ xem có ai phản hồi về lỗi hiển thị trong vòng vài ngày hay không"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 32,
+    chapter: 1,
+    text: "Khi làm tiểu luận, một sinh viên tìm bài báo khoa học trên Google Scholar, đối chiếu số liệu giữa nhiều nguồn và loại bỏ một trang tin không rõ nguồn gốc. Hoạt động này thuộc miền năng lực nào trong khung 6 miền?",
+    options: {
+      a: "Miền 3 (Sáng tạo nội dung số)",
+      b: "Miền 2 (Giao tiếp và hợp tác trong môi trường số)",
+      c: "Miền 6 (Ứng dụng AI và giải quyết vấn đề)",
+      d: "Miền 1 (Khai thác dữ liệu và thông tin)"
+    },
+    correctAnswer: "d"
+  },
+
+  // CHƯƠNG 2 (Câu 33 - 68)
+  {
+    id: 33,
+    chapter: 2,
+    text: "Vì sao khi danh mục tài liệu tham khảo có trên 10 nguồn, sinh viên được khuyên KHÔNG nên bỏ qua công cụ quản lý trích dẫn để làm thủ công?",
+    options: {
+      a: "Vì giảng viên thường kiểm tra xem sinh viên có dùng công cụ quản lý trích dẫn hay không",
+      b: "Vì rủi ro sai sót định dạng hoặc bỏ sót trích dẫn tăng lên đáng kể khi số nguồn nhiều",
+      c: "Vì gõ tay danh mục hơn mười nguồn tốn nhiều thời gian hơn thời gian cài đặt phần mềm",
+      d: "Vì các chuẩn trích dẫn chỉ công nhận danh mục do phần mềm chuyên dụng xuất ra"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 34,
+    chapter: 2,
+    text: "Một sinh viên cần toàn văn một bài báo, nhưng thư viện trường không có quyền truy cập. Trong bốn cách dưới đây, cách nào vừa hợp pháp vừa khả thi nhất?",
+    options: {
+      a: "Chỉ đọc phần tóm tắt miễn phí rồi trích dẫn như đã đọc toàn văn, vì tóm tắt đã nêu đủ kết quả chính",
+      b: "Tìm bản do chính tác giả tự đăng trên kho lưu trữ mở, vì tác giả có quyền tự phổ biến bản thảo của mình",
+      c: "Nhờ một người quen ở trường khác dùng tài khoản của họ tải hộ rồi gửi lại tệp toàn văn cho mình",
+      d: "Tải từ một trang tập hợp bài báo đã dỡ tường phí, vì nội dung khoa học thì nên được tự do tiếp cận"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 35,
+    chapter: 2,
+    text: "Một sinh viên lần đầu học trực quan hoá dữ liệu và đã có sẵn bảng dữ liệu đã làm sạch trong Google Sheets. Hướng bắt đầu nào là hợp lý nhất?",
+    options: {
+      a: "Thử Looker Studio trước vì tận dụng luôn dữ liệu sẵn ở Sheets",
+      b: "Bắt đầu với Flourish vì biểu đồ có hiệu ứng chuyển động, hấp dẫn hơn cho người mới",
+      c: "Dùng biểu đồ mặc định của bảng tính rồi chèn ảnh chụp biểu đồ vào báo cáo",
+      d: "Học viết mã tuỳ chỉnh vì công cụ kéo-thả khó cho kết quả tốt"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 36,
+    chapter: 2,
+    text: "Một sinh viên chấm một bài viết theo CRAAP và kết luận \"nguồn đạt\", với lý do: bài đăng năm 2025 (Currency đạt), tác giả là giám đốc một công ty phần mềm (Authority đạt), có nhiều số liệu (Accuracy đạt). Bài đăng trên blog của chính công ty đó, nội dung giới thiệu sản phẩm của công ty. Nhận định nào đánh giá đúng phiếu chấm này?",
+    options: {
+      a: "Chưa xác đáng: phiếu bỏ qua Purpose, và tác giả có lợi ích liên quan nên cần xét lại Authority; nguồn chỉ dùng được có điều kiện",
+      b: "Chưa xác đáng: bài đăng trên blog thì luôn bị loại theo CRAAP, nên không cần chấm các tiêu chí còn lại mà bỏ hẳn nguồn này khỏi bài",
+      c: "Xác đáng: tác giả là giám đốc công ty trong ngành nên có chuyên môn cao, và bài có số liệu cụ thể nên đủ để đánh giá nguồn là đạt",
+      d: "Xác đáng: bài đã đạt ba trên năm tiêu chí, quá nửa bộ tiêu chí CRAAP, nên có thể dùng nguồn này như một nguồn tham khảo bình thường"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 37,
+    chapter: 2,
+    text: "Sinh viên tìm được hai nguồn về cùng một chỉ số của ngành. Nguồn X là báo cáo năm nay của một công ty bán giải pháp trong ngành đó, số liệu chi tiết và có nêu phương pháp lấy mẫu. Nguồn Y là bài báo khoa học có bình duyệt từ 4 năm trước, phương pháp chặt chẽ nhưng dữ liệu đã cũ. Cách sử dụng hai nguồn nào hợp lý nhất?",
+    options: {
+      a: "Lấy phương pháp và định nghĩa chỉ số từ Y, lấy số liệu mới từ X và ghi rõ X có lợi ích liên quan",
+      b: "Lấy cả phương pháp và số liệu từ Y, vì nguồn đã qua bình duyệt đáng tin hơn nguồn chưa bình duyệt",
+      c: "Bỏ cả hai nguồn và tìm nguồn vừa mới vừa có bình duyệt, vì nguồn dùng được phải đạt đủ tiêu chí",
+      d: "Lấy cả phương pháp và số liệu từ X, vì trong phân tích số liệu thì tính cập nhật quan trọng hơn cả"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 38,
+    chapter: 2,
+    text: "Từ kết quả thực tế khi nhờ AI làm sạch dữ liệu khảo sát và dựng dashboard, vai trò của AI và con người được phân định như thế nào?",
+    options: {
+      a: "AI phát hiện tốt bất thường trên diện rộng, con người xác nhận các bước quan trọng trước khi áp dụng",
+      b: "Con người xử lý từng dòng dữ liệu bằng tay, còn AI đảm nhận phần trang trí biểu đồ cho dashboard đẹp hơn",
+      c: "AI đảm nhận trọn quy trình từ làm sạch đến kết luận, con người quan sát để học lại các thao tác của AI",
+      d: "AI và con người cùng thao tác song song trên bản dữ liệu gốc để đối chiếu chéo kết quả lẫn nhau về sau"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 39,
+    chapter: 2,
+    text: "Còn bốn mươi phút trước khi nộp phần tổng quan, sinh viên chưa có nguồn nào. Chế độ nghiên cứu sâu cần khoảng mười lăm phút cho một lượt và trả về báo cáo có trích dẫn. Cách dùng thời gian hợp lý nhất là gì?",
+    options: {
+      a: "Chạy nghiên cứu sâu với yêu cầu càng rộng càng tốt, vì phạm vi rộng thì báo cáo trả về sẽ nhiều nguồn hơn",
+      b: "Bỏ chế độ nghiên cứu sâu, hỏi đáp thông thường nhiều lượt để kịp thời gian rồi ghi nguồn theo bản trả lời",
+      c: "Chạy một lượt nghiên cứu sâu với yêu cầu đã thu hẹp, dùng hai mươi lăm phút còn lại để mở từng nguồn đối chiếu",
+      d: "Chạy hai lượt nghiên cứu sâu để có nhiều nguồn hơn, rồi ghép hai báo cáo lại và nộp phần tổng quan"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 40,
+    chapter: 2,
+    text: "Bảng khảo sát của một sinh viên sau khi nhờ AI làm sạch có: tổng số dòng khớp bản gốc, cột tên trường đã thống nhất, nhưng 12 ô vốn bỏ trống nay đều có giá trị và bản gốc đã bị ghi đè. Vấn đề gốc cần xử lý trước tiên là gì?",
+    options: {
+      a: "Ô trống bị điền giá trị bịa trong khi bản gốc đã bị ghi đè, không còn gì để đối chiếu",
+      b: "Đây là vấn đề trình bày, nên tô màu các ô AI vừa điền để người đọc dễ theo dõi hơn",
+      c: "Khâu chuẩn hoá tên trường mới là rủi ro nhất, còn ô trống được điền giúp bảng đầy đủ hơn",
+      d: "Tổng số dòng vẫn khớp bản gốc, nên bổ sung ghi chú các thay đổi là bảng đã đạt yêu cầu"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 41,
+    chapter: 2,
+    text: "Khi dùng bảng tính có tích hợp trợ lý AI (Google Sheets với Gemini, Excel với Copilot), thay vì phải nhớ cú pháp hàm phức tạp (VLOOKUP, INDEX-MATCH, PivotTable...), người dùng chỉ cần làm gì?",
+    options: {
+      a: "Xuất dữ liệu sang phần mềm thống kê chuyên dụng rồi nhập kết quả trở lại bảng tính",
+      b: "Cài thêm một trình bổ trợ lập trình Python bên ngoài vào phần mềm bảng tính",
+      c: "Học thuộc toàn bộ danh sách hàm nâng cao trước khi được phép kích hoạt trợ lý AI",
+      d: "Mô tả yêu cầu bằng ngôn ngữ tự nhiên để AI tự viết công thức, thực hiện thao tác"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 42,
+    chapter: 2,
+    text: "Một nhóm viết trong báo cáo: \"đã tra tiêu chuẩn trên cổng chính thức, thấy tiêu chuẩn còn hiệu lực, nên trích nội dung từ một bài phân tích viết lại tiêu chuẩn đó\". Chỗ chưa đạt của cách làm này là gì?",
+    options: {
+      a: "Đã xác định đúng số hiệu và hiệu lực nhưng nội dung trích lại lấy từ bài viết lại, nên vẫn chưa trích từ văn bản gốc",
+      b: "Việc tra hiệu lực là không cần thiết, vì tiêu chuẩn đã công bố thì giữ hiệu lực cho tới khi có văn bản thay thế",
+      c: "Cổng chính thức không phải nguồn tra cứu hợp lệ, nên phải tra lại qua cơ sở dữ liệu tiêu chuẩn quốc tế như ISO",
+      d: "Bài phân tích viết lại tiêu chuẩn là nguồn tốt hơn văn bản gốc, vì nó diễn giải nội dung cho dễ hiểu hơn"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 43,
+    chapter: 2,
+    text: "Một nhóm cần kiểm chứng ba nội dung: (1) một đoạn ghi âm giọng lãnh đạo; (2) một ảnh chụp hiện trường; (3) một đoạn văn bản dài nghi do AI viết. Cách bố trí công cụ và thao tác nào hợp lý nhất?",
+    options: {
+      a: "Cả ba đều bắt đầu bằng công cụ phát hiện, rồi chỉ truy nguồn với những nội dung mà công cụ báo là tổng hợp",
+      b: "Truy nguồn riêng cho (2), còn với (1) và (3) thì kết quả công cụ đã đủ để kết luận về nguồn gốc",
+      c: "Dùng công cụ cho (1) và (2), còn (3) thì đọc kỹ văn phong là nhận ra được văn bản do AI viết",
+      d: "Cả ba đều bắt đầu bằng truy nguồn gốc, rồi mới dùng công cụ phù hợp từng loại nội dung làm dữ kiện bổ sung"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 44,
+    chapter: 2,
+    text: "Sinh viên yêu cầu trợ lý AI trong bảng tính \"tính điểm trung bình theo lớp\". Kết quả trả về một bảng gọn gàng, nhưng tổng số sinh viên trong bảng ít hơn dữ liệu gốc 37 người. Bước kiểm chứng nào nên làm TRƯỚC tiên?",
+    options: {
+      a: "Đối chiếu tổng số dòng đầu vào với số bản ghi đã tính, để tìm chỗ đã loại ba mươi bảy người ra",
+      b: "Kiểm tra định dạng số của cột điểm, vì sai định dạng là nguyên nhân thường gặp khi tính trung bình",
+      c: "Yêu cầu trợ lý AI tính lại một lần nữa, để xem kết quả lần hai có trùng khớp với lần đầu không",
+      d: "Chuyển dữ liệu sang một công cụ khác và tính lại, để so hai kết quả xem bên nào đáng tin hơn"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 45,
+    chapter: 2,
+    text: "Nhóm làm tiểu luận về hành vi tiêu dùng của sinh viên đặt quy tắc: \"Chỉ lấy nguồn từ IEEE Xplore, vì đây là cơ sở dữ liệu trả phí nên chất lượng chắc chắn cao hơn Google Scholar.\" Nhận định nào đánh giá đúng quy tắc này?",
+    options: {
+      a: "Chỉ chưa đúng ở phạm vi lĩnh vực; còn lý do trả phí thì hợp lý vì nguồn trả phí thường đã qua bình duyệt kỹ hơn nguồn miễn phí",
+      b: "Đúng: cơ sở dữ liệu trả phí luôn được kiểm duyệt kỹ hơn, nên chỉ dùng một nguồn trả phí sẽ giúp phần tổng quan đáng tin cậy hơn",
+      c: "Chưa đúng ở hai điểm: IEEE Xplore chuyên kỹ thuật điện, máy tính nên ít hợp đề tài này, và trả phí không đồng nghĩa chất lượng cao",
+      d: "Chỉ chưa đúng ở lý do trả phí; còn việc chỉ dùng IEEE Xplore thì hợp lý vì đây là cơ sở dữ liệu lớn và có uy tín cao trên thế giới"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 46,
+    chapter: 2,
+    text: "Một sinh viên cần toàn văn ba bài báo cho đồ án, nhưng thư viện trường không có quyền truy cập cả ba bài. Nên thử các cách theo thứ tự nào?",
+    options: {
+      a: "Nhờ người quen ở trường khác tải hộ trước, rồi mới tìm bản do tác giả tự đăng nếu người quen không tải được",
+      b: "Tải từ trang tập hợp bài báo đã dỡ tường phí trước, vì nhanh nhất, rồi mới tính tới các cách còn lại",
+      c: "Tìm bản tác giả tự đăng, rồi bản truy cập mở của nhà xuất bản, sau cùng nhờ thư viện hỗ trợ qua kênh chính thức",
+      d: "Dùng bản tóm tắt miễn phí cho cả ba bài và trích dẫn như đã đọc toàn văn, vì tóm tắt đã nêu kết quả chính"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 47,
+    chapter: 2,
+    text: "Một sinh viên quét một video đang lan truyền trên TikTok bằng Nvidia Synthetic Video Detector, nhận kết quả \"không phát hiện dấu hiệu giả\" và kết luận video chắc chắn là thật. Lập luận này mắc lỗi gì?",
+    options: {
+      a: "Bỏ qua việc độ chính xác giảm khi video bị nén trên mạng xã hội và việc công cụ không đạt mức tuyệt đối",
+      b: "Hiểu ngược kết quả, vì thông báo \"không phát hiện\" của công cụ có nghĩa là video đã được xác nhận giả",
+      c: "Quét quá sớm, vì công cụ phát hiện cần video lan truyền đủ lâu để tích luỹ đủ dữ liệu cho việc phân tích",
+      d: "Dùng sai công cụ, vì Nvidia Detector được thiết kế cho âm thanh còn video phải được quét bằng SynthID"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 48,
+    chapter: 2,
+    text: "Hai sinh viên cùng nhờ AI làm sạch một bảng khảo sát 250 dòng. Bảng của X còn 232 dòng, có ghi chú \"đã xoá 18 dòng trùng\" và 5 ô được đánh dấu \"thiếu dữ liệu\". Bảng của Y vẫn đủ 250 dòng, không còn ô trống nào, trình bày rất gọn, nhưng không có ghi chú nào về các thay đổi. Nhận định nào đánh giá đúng hai bảng?",
+    options: {
+      a: "Bảng X tốt hơn: mọi thay đổi đều giải thích được; bảng Y cần kiểm lại vì ô trống có thể đã bị điền bừa và dòng trùng chưa được xử lý",
+      b: "Hai bảng ngang nhau: mỗi bảng mạnh một tiêu chí, bảng X rõ ràng về thay đổi còn bảng Y đầy đủ về dữ liệu, nên chấm cùng một mức chung",
+      c: "Bảng Y tốt hơn: giữ đủ 250 dòng là giữ được toàn vẹn dữ liệu, còn bảng X đã làm mất 18 dòng và vẫn để lại 5 ô thiếu dữ liệu chưa xử lý",
+      d: "Bảng Y tốt hơn: AI đã tự lấp các ô trống bằng giá trị phù hợp nên dữ liệu đầy đủ hơn, và bảng gọn hơn thì dễ đưa vào dashboard hơn"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 49,
+    chapter: 2,
+    text: "Khi thấy một bài đăng gây sốc trên mạng xã hội, một sinh viên lập tức tìm tên tác giả rồi dành hai mươi phút đọc hồ sơ người đó, sau đó mới nhận ra bài đăng là ảnh chụp lại từ một bài khác đã bị cắt ngữ cảnh. Sai sót về quy trình thẩm định nằm ở đâu?",
+    options: {
+      a: "Bỏ qua bước dừng lại, rồi sa vào điều tra tác giả quá lâu mà chưa truy về bài gốc đã bị cắt ngữ cảnh",
+      b: "Bỏ qua yêu cầu về nguồn khởi đầu, vì quy trình thẩm định chỉ cho bắt đầu từ cơ sở dữ liệu học thuật",
+      c: "Không bỏ qua bước nào, vì sinh viên đã tìm hiểu tác giả trước khi phát hiện bài đăng bị cắt ngữ cảnh",
+      d: "Bỏ qua việc kiểm tra hồ sơ tác giả kỹ hơn, nên hai mươi phút là chưa đủ để đánh giá một hồ sơ cá nhân"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 50,
+    chapter: 2,
+    text: "Hai sinh viên cùng tra một quy định. Bạn A mất ba phút, lấy nội dung từ một bài tổng hợp. Bạn B mất hai mươi phút, lấy từ văn bản gốc trên cổng của cơ quan ban hành. Cách so sánh nào đúng?",
+    options: {
+      a: "Bạn A hiệu quả hơn vì cùng ra kết quả mà tốn ít thời gian hơn, đây là tiêu chí đánh giá tra cứu",
+      b: "Hai bạn tương đương vì cùng tìm ra nội dung quy định, chỉ khác nơi lấy nội dung đó về",
+      c: "Bạn B hiệu quả hơn vì thời gian tra cứu càng dài thì kết quả càng đáng tin, kể cả với quy định",
+      d: "Hai bạn đạt hai mục tiêu khác nhau: A nhanh nhưng chấp nhận rủi ro nội dung đã bị diễn giải lại"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 51,
+    chapter: 2,
+    text: "Khi chọn tài liệu cho tiểu luận về một công cụ AI mới ra mắt, một sinh viên lập luận: \"Bài A (năm 2010, 500 lượt trích dẫn) phù hợp hơn hẳn bài B (năm 2024, 40 lượt trích dẫn, đăng trên tạp chí có bình duyệt) vì có lượt trích dẫn cao hơn nhiều\". Nhận định nào chỉ ra đúng điểm yếu của lập luận này?",
+    options: {
+      a: "Chỉ xét lượt trích dẫn mà bỏ qua tính cập nhật, trong khi chủ đề công nghệ cần ưu tiên tài liệu gần đây",
+      b: "Bỏ sót chi phí truy cập, vì bài có nhiều lượt trích dẫn thường thu phí tải cao hơn các bài mới công bố",
+      c: "Đọc sai chỉ số, vì \"Cited by\" thể hiện số nguồn mà bài báo đó trích dẫn chứ không phải chiều ngược lại",
+      d: "So sánh thiếu chuẩn, vì hai bài báo khác năm xuất bản thì về nguyên tắc không được phép đối chiếu nhau"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 52,
+    chapter: 2,
+    text: "Trước khi để Gemini trong Google Sheets làm sạch hàng loạt file khảo sát của câu lạc bộ, bước an toàn cần làm trước tiên là gì?",
+    options: {
+      a: "Đổi tên file thành bản hoàn thiện để cả nhóm không nhầm lẫn",
+      b: "Xoá trước các dòng trống trong bảng để AI xử lý được nhanh hơn",
+      c: "Sao chép dữ liệu sang tab \"Dữ liệu gốc\" riêng và khoá chỉnh sửa",
+      d: "Đặt chế độ chia sẻ công khai để cả câu lạc bộ cùng theo dõi"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 53,
+    chapter: 2,
+    text: "Từ vụ đường dây deepfake tống tiền tại TP.HCM (2024), có thể rút ra bài học phòng ngừa nào?",
+    options: {
+      a: "Ảnh khuôn mặt rõ nét đăng công khai có thể trở thành nguyên liệu để kẻ gian dựng video giả",
+      b: "Trả tiền theo yêu cầu ngay lần đầu thường giúp chấm dứt sớm hành vi tống tiền",
+      c: "Video giả nên được yêu cầu nền tảng gỡ bỏ xong rồi mới tính đến việc trình báo",
+      d: "Ảnh khuôn mặt chỉ trở thành nguyên liệu deepfake khi bị đánh cắp trực tiếp từ thiết bị cá nhân"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 54,
+    chapter: 2,
+    text: "Chu trình làm việc với thông tin gồm năm bước theo thứ tự: tìm kiếm hiệu quả -> thẩm định độ tin cậy -> khai thác nguồn học thuật và tiêu chuẩn kỹ thuật -> tổ chức, trực quan hoá dữ liệu -> trích dẫn đúng chuẩn. Một sinh viên lập kế hoạch làm tiểu luận theo trình tự: tạo danh mục trích dẫn bằng Zotero -> tìm kiếm nguồn -> thẩm định độ tin cậy các nguồn -> khai thác cơ sở dữ liệu học thuật -> trực quan hoá dữ liệu. So với chu trình trên, kế hoạch này sai ở điểm nào?",
+    options: {
+      a: "Đặt bước tìm kiếm ở giữa, trong khi tìm kiếm phải là bước cuối sau khi đã trực quan hoá",
+      b: "Đặt bước trực quan hoá ở cuối, trong khi dữ liệu phải được trực quan hoá trước khi thẩm định",
+      c: "Đặt bước tìm kiếm trước bước thẩm định, trong khi thẩm định nguồn phải làm xong trước",
+      d: "Đặt bước trích dẫn lên đầu, trong khi trích dẫn chỉ làm được sau khi đã có nguồn"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 55,
+    chapter: 2,
+    text: "Sau khi tải được một file PDF được cho là tiêu chuẩn kỹ thuật, sinh viên cần xác nhận đây đúng là văn bản gốc. Dấu hiệu nào đáng dựa vào nhất?",
+    options: {
+      a: "File nằm ở vị trí đầu tiên trong trang kết quả của công cụ tìm kiếm",
+      b: "File có dung lượng lớn, số trang nhiều hơn hẳn các bản khác tìm thấy",
+      c: "File có dấu, logo cơ quan ban hành và ghi rõ tình trạng hiệu lực",
+      d: "File được nhiều diễn đàn kỹ thuật khác nhau đăng lại và chia sẻ"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 56,
+    chapter: 2,
+    text: "Khi làm tổng quan tài liệu, một sinh viên cần các báo cáo dạng tệp tải về được từ trang của cơ quan nhà nước và muốn tránh mất thời gian mở từng trang tin. Cách dựng truy vấn nào hiệu quả nhất?",
+    options: {
+      a: "Chỉ giới hạn định dạng tệp cần tìm, vì mọi tệp ở định dạng đó trên mạng đều là tài liệu chính thống",
+      b: "Chỉ giới hạn tên miền cơ quan nhà nước, vì trong tên miền đó chỉ có tài liệu đã được ban hành",
+      c: "Không dùng toán tử nào, chỉ thêm cụm báo cáo chính thức vào truy vấn để công cụ tự hiểu ý người tìm",
+      d: "Kết hợp giới hạn định dạng tệp với giới hạn tên miền, vì hai điều kiện lọc theo hai chiều khác nhau"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 57,
+    chapter: 2,
+    text: "Khi chuẩn bị cho một buổi tranh biện về việc có nên cấm điện thoại trong lớp học, một sinh viên dùng công cụ AI search và nhận được câu trả lời tổng hợp từ 30 nguồn; xem lại thì 25 nguồn là bài báo cùng ủng hộ việc cấm. Bạn ấy nhận định: \"Đã có 30 nguồn thì câu trả lời phản ánh đủ các góc nhìn, không cần tìm thêm.\" Nhận định nào đánh giá đúng ý kiến này?",
+    options: {
+      a: "Đúng: 30 nguồn là đủ lớn để bao quát mọi quan điểm, và công cụ AI search đã tự cân bằng các ý kiến trái chiều trước khi tổng hợp",
+      b: "Chưa đúng: nhiều nguồn chưa chắc nhiều góc nhìn, vì công cụ ưu tiên hiển thị theo thuật toán; cần chủ động hỏi còn thiếu góc nhìn nào",
+      c: "Chưa đúng: công cụ AI search luôn bỏ qua các nguồn tiếng Việt, nên cần tìm lại toàn bộ bằng Google truyền thống để có nguồn trong nước",
+      d: "Chưa đúng: cần tăng lên ít nhất 50 nguồn thì câu trả lời tổng hợp mới đủ đại diện cho các góc nhìn trong một buổi tranh biện"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 58,
+    chapter: 2,
+    text: "Tra cứu trên Google Scholar, một sinh viên nhận về nhiều bài báo đã xuất bản từ hơn mười năm trước, không còn phù hợp với đề tài cần số liệu mới. Thao tác nào giải quyết đúng vấn đề?",
+    options: {
+      a: "Kéo xuống đọc từ trang kết quả cuối cùng trở ngược lên",
+      b: "Dùng bộ lọc thời gian để giữ lại các công bố gần đây",
+      c: "Chuyển ngôn ngữ giao diện của trang sang tiếng Anh",
+      d: "Gõ thêm cụm \"mới nhất\" vào phía cuối chuỗi từ khoá"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 59,
+    chapter: 2,
+    text: "Một nhóm nghiên cứu phải làm sạch bảng khảo sát 40.000 dòng với nhiều kiểu viết tắt không nhất quán, trong khi tài khoản không có trợ lý AI tích hợp trong bảng tính. Đối chiếu bốn phương án làm sạch dữ liệu, lựa chọn tối ưu là gì?",
+    options: {
+      a: "Công cụ chuyên làm sạch như OpenRefine, vì dữ liệu rất lớn và lỗi viết tắt cần gom nhóm hàng loạt",
+      b: "Hoãn xử lý đến khi được cấp trợ lý AI trong bảng tính, vì các phương án còn lại cho chất lượng thấp hơn",
+      c: "Trợ lý AI có sẵn trong bảng tính, vì đây là phương án mặc định phù hợp nhất cho người mới làm sạch dữ liệu",
+      d: "Nền tảng trực quan hoá kéo thả, vì kéo thả xử lý nhanh dữ liệu lớn mà không đòi hỏi biết công thức"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 60,
+    chapter: 2,
+    text: "Một nhóm dùng Deep Research tạo báo cáo có 12 trích dẫn. Nhóm mở 3 trích dẫn quan trọng nhất và thấy cả ba đều mở được, đúng bài, nội dung khớp. Cuối báo cáo có đoạn khuyến nghị \"các doanh nghiệp trong ngành nên đầu tư AI ngay trong năm nay\", đoạn này không gắn nguồn nào. Nhóm kết luận: \"Báo cáo đáng tin, có thể nộp nguyên văn.\" Nhận định nào đánh giá đúng kết luận của nhóm?",
+    options: {
+      a: "Chưa đúng: bước kiểm trích dẫn đã đúng, nhưng đoạn khuyến nghị không có nguồn là nhận định của AI, nhóm phải tự thẩm định, viết lại",
+      b: "Đúng: nhóm đã kiểm đúng các trích dẫn quan trọng nhất và cả ba đều khớp với nguồn, nên phần còn lại của báo cáo có thể dùng nguyên văn",
+      c: "Chưa đúng: báo cáo do AI viết thì không được dùng trong bài nộp dưới bất kỳ hình thức nào, kể cả khi mọi trích dẫn đều khớp với nguồn",
+      d: "Chưa đúng: nhóm phải mở và đối chiếu đủ cả 12 trích dẫn thì mới được phép dùng bất kỳ nội dung nào trong báo cáo do công cụ tạo ra"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 61,
+    chapter: 2,
+    text: "Sinh viên giới hạn tìm kiếm về tên miền của một trường đại học nhưng không ra kết quả nào, dù trang của trường có tài liệu đó. Nguyên nhân thường gặp nhất là gì?",
+    options: {
+      a: "Trang của trường chặn công cụ tìm kiếm, nên không tài liệu nào của trường xuất hiện trong kết quả",
+      b: "Toán tử giới hạn nguồn chỉ hoạt động với tên miền thương mại, không dùng được cho tên miền giáo dục",
+      c: "Công cụ tìm kiếm không cho dùng đồng thời từ khoá và toán tử giới hạn nguồn trong cùng một truy vấn",
+      d: "Tên miền viết chưa đúng hoặc tài liệu nằm ở tên miền con khác, nên điều kiện giới hạn không khớp"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 62,
+    chapter: 2,
+    text: "Khi đang đọc một bài báo khoa học trên trình duyệt, một sinh viên muốn lưu ngay thông tin trích dẫn của bài vào thư viện Zotero cá nhân. Thao tác nào đúng?",
+    options: {
+      a: "Chụp màn hình trang bài báo trên trình duyệt rồi lưu ảnh vào một thư mục riêng",
+      b: "In trang đầu của bài báo khoa học ra giấy để kẹp vào hồ sơ của môn học",
+      c: "Bấm nút Zotero Connector trên thanh công cụ trình duyệt ngay khi đang đọc bài",
+      d: "Chép đường liên kết bài báo vào ứng dụng ghi chú để nhập vào Zotero lúc khác"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 63,
+    chapter: 2,
+    text: "Chế độ \"Deep Research\" trong các công cụ tìm kiếm AI được mô tả là gì?",
+    options: {
+      a: "Chế độ AI tự lập kế hoạch tìm kiếm nhiều bước, đọc nhiều nguồn rồi tổng hợp báo cáo có trích dẫn",
+      b: "Chế độ AI trả lời tức thì trong vài giây dựa trên dữ liệu đã huấn luyện sẵn, không truy cập web",
+      c: "Chế độ AI chỉ tìm kiếm bên trong các cơ sở dữ liệu học thuật có bình duyệt như IEEE Xplore",
+      d: "Chế độ AI tự động tải toàn văn các tài liệu tìm được về máy người dùng để đọc lại khi ngoại tuyến"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 64,
+    chapter: 2,
+    text: "SynthID của Google DeepMind là công nghệ hoạt động theo cơ chế nào?",
+    options: {
+      a: "Chặn tự động các tài khoản chuyên phát tán nội dung giả mạo trên các nền tảng lớn",
+      b: "Đóng dấu vô hình (watermark) vào nội dung ngay khi AI của Google sinh ra nội dung đó",
+      c: "Quét và phát hiện video giả sau khi nội dung đã được đăng tải lên các mạng xã hội",
+      d: "So khớp khuôn mặt xuất hiện trong video với cơ sở dữ liệu ảnh gốc của người bị giả mạo"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 65,
+    chapter: 2,
+    text: "Bảng khảo sát 3.000 dòng được gộp từ ba đợt thu khác nhau, mỗi đợt dùng một mẫu phiếu riêng. Sau khi cho AI chuẩn hoá thử 100 dòng đầu (đều thuộc đợt 1), nhóm thấy kết quả đều đúng. Một thành viên đề xuất: \"Cho AI áp dụng cho cả bảng và ghi đè luôn lên dữ liệu gốc để tiết kiệm thời gian, vì bản chạy thử đã đúng hết.\" Nhận định nào đánh giá đúng đề xuất này?",
+    options: {
+      a: "Chưa hợp lý: 100 dòng đầu chưa đại diện cho cả bảng, và ghi đè làm mất khả năng quay lại; nên làm trên bản sao rồi kiểm thêm",
+      b: "Hợp lý: bản chạy thử đúng 100% là đủ bằng chứng cho cả bảng, và việc giữ dữ liệu gốc chỉ làm tệp thêm nặng mà không có lợi ích gì",
+      c: "Chưa hợp lý, vì AI không bao giờ được phép chuẩn hoá dữ liệu khảo sát; việc này phải làm thủ công hoàn toàn để bảo đảm chính xác",
+      d: "Chưa hợp lý, vì phải chạy thử thêm cho đủ 3.000 dòng bằng tay rồi mới cho AI xử lý, để so sánh từng dòng giữa người và máy với nhau"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 66,
+    chapter: 2,
+    text: "Sinh viên vào cơ sở dữ liệu học thuật từ mạng ở nhà và bị chặn, dù trường đã mua quyền truy cập. Cách xử lý đúng và nguyên nhân của hiện tượng là gì?",
+    options: {
+      a: "Quyền truy cập chỉ áp dụng cho giảng viên, sinh viên phải xin cấp riêng từng lần cho từng bài báo cần đọc",
+      b: "Quyền truy cập chỉ dùng được trong giờ hành chính, nên cần chờ tới giờ làm việc của thư viện rồi vào lại",
+      c: "Quyền truy cập gắn với mạng hoặc tài khoản của trường, nên cần đăng nhập qua cổng thư viện hoặc mạng trường",
+      d: "Quyền truy cập bị chặn vì sinh viên chưa cài tiện ích của nhà xuất bản trên trình duyệt ở máy cá nhân"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 67,
+    chapter: 2,
+    text: "Sinh viên cần tìm quy chế đào tạo nhưng kết quả trả về toàn bài viết của các diễn đàn và trang tin tổng hợp. Cách điều chỉnh truy vấn nào xử lý đúng nguyên nhân?",
+    options: {
+      a: "Giới hạn phạm vi tìm về đúng tên miền của trường hoặc cơ quan quản lý, vì truy vấn chưa giới hạn nguồn",
+      b: "Thêm nhiều từ khoá đồng nghĩa vào truy vấn, vì càng nhiều kết quả thì càng dễ gặp đúng trang cần tìm",
+      c: "Chuyển sang một công cụ tìm kiếm khác, vì công cụ đang dùng ưu tiên trang có nhiều người truy cập",
+      d: "Đặt toàn bộ truy vấn trong dấu ngoặc kép, vì như vậy công cụ chỉ trả về các trang chính thống"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 68,
+    chapter: 2,
+    text: "Một sinh viên làm luận văn muốn có tính năng AI tóm tắt tài liệu tích hợp sẵn trong phần mềm quản lý trích dẫn, không phải cài thêm plugin; trường đã mua bản quyền EndNote. Lựa chọn nào đúng?",
+    options: {
+      a: "Trình đọc PDF mặc định của máy, vì tự tóm tắt được tài liệu",
+      b: "Bảng tính có AI, vì thay thế được phần mềm quản lý trích dẫn",
+      c: "Zotero bản lõi, vì phần mềm này đã tích hợp sẵn AI tóm tắt",
+      d: "EndNote 2025, vì có sẵn Key Takeaway và Chat with Document"
+    },
+    correctAnswer: "d"
+  },
+
+  // CHƯƠNG 3 (Câu 69 - 97)
+  {
+    id: 69,
+    chapter: 3,
+    text: "Sau một cuộc họp mô phỏng, danh sách đầu việc do cả nhóm chốt cuối buổi có 12 việc. Đối chiếu với bản AI tóm tắt: 8 việc AI trích đúng, 3 việc AI hiểu sai, 1 việc AI bỏ sót. Tỷ lệ lỗi của bản AI được tính đúng là bao nhiêu?",
+    options: {
+      a: "Khoảng 25% – lấy 3 việc hiểu sai chia cho 12 việc, vì việc bị bỏ sót không tính là lỗi của bản AI",
+      b: "Khoảng 33% – lấy 3 việc hiểu sai cộng 1 việc bị bỏ sót, chia cho 12 việc trong danh sách chuẩn",
+      c: "Khoảng 8% – lấy 1 việc bị bỏ sót chia cho 12 việc, vì việc hiểu sai vẫn sửa lại được khi hiệu đính",
+      d: "Khoảng 50% – lấy 3 việc hiểu sai cộng 1 việc bị bỏ sót, chia cho 8 việc mà AI đã trích đúng"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 70,
+    chapter: 3,
+    text: "Nhóm của Sang dùng đúng prompt mẫu để Notion AI tổng hợp báo cáo tuần, nhưng báo cáo nhiều lần sai so với thực tế; kiểm tra thấy nhiều thành viên đã xong việc mà không đổi trạng thái trên bảng. Kết luận nào phản ánh đúng quan hệ nhân quả?",
+    options: {
+      a: "Báo cáo sai vì prompt thiếu yêu cầu về độ dài nên AI tự suy diễn thêm nội dung ngoài bảng",
+      b: "Báo cáo sai vì bảng công việc thiếu cột hạn chót nên AI không tính được tiến độ từng việc",
+      c: "Báo cáo sai vì nhóm dùng Notion AI ở gói miễn phí nên độ chính xác của AI bị giới hạn",
+      d: "Báo cáo sai vì dữ liệu trạng thái đầu vào không được cập nhật, không phải vì prompt kém"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 71,
+    chapter: 3,
+    text: "Một sinh viên nhờ AI viết phần mô tả kinh nghiệm cho hồ sơ nghề nghiệp và nhận về đoạn văn rất trau chuốt nhưng có vài chi tiết phóng đại so với thực tế. Cách xử lý đúng là gì?",
+    options: {
+      a: "Giữ nguyên đoạn văn nhưng thêm một dòng ghi chú ở cuối hồ sơ cho biết phần mô tả này có AI hỗ trợ viết",
+      b: "Giữ nguyên đoạn văn vì đây thường chỉ là cách diễn đạt gây ấn tượng, thực tế sẽ được làm rõ ở phỏng vấn",
+      c: "Sửa lại cho khớp thực tế và tự biên tập giữ giọng văn của mình, vì nhà tuyển dụng có thể hỏi sâu từng mục",
+      d: "Xoá hẳn mục kinh nghiệm khỏi hồ sơ để tránh rủi ro, vì sinh viên năm đầu thường chưa có kinh nghiệm làm việc"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 72,
+    chapter: 3,
+    text: "Kha nhắn cho một đối tác là bạn học đang đi trao đổi tại Nhật Bản: \"Mai họp 14h nhé, làm nhanh gọn kiểu cân hết trong một nốt nhạc\". Đối tác vào phòng họp sớm hai tiếng vì hiểu 14h theo giờ Nhật, và không hiểu cụm từ lóng. Kha đã vi phạm những nguyên tắc netiquette nào?",
+    options: {
+      a: "Không ghi rõ múi giờ khi hẹn thời gian và dùng tiếng lóng với đối tác thuộc nền văn hoá khác",
+      b: "Không dùng ngôn ngữ trang trọng trong nhóm chat và phản hồi tin nhắn muộn quá 24 giờ làm việc",
+      c: "Không tắt mic trong lúc họp online và không bật camera theo đúng yêu cầu của nhóm học tập",
+      d: "Không gửi tin xác nhận đã nhận tin nhắn và viết tin không chia đoạn khiến đối tác khó đọc"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 73,
+    chapter: 3,
+    text: "Một trung tâm chọn nền tảng lưu trữ tài liệu. Toàn bộ nhân sự đã có tài khoản thuộc một bộ công cụ văn phòng, và tài liệu cần mở cùng lúc nhiều người. Căn cứ chọn nào hợp lý nhất?",
+    options: {
+      a: "Chọn nền tảng có dung lượng miễn phí lớn nhất, vì dung lượng quyết định số tài liệu trung tâm lưu được",
+      b: "Chọn nền tảng có tốc độ đồng bộ nhanh nhất, vì tốc độ quyết định trải nghiệm khi nhiều người cùng mở tài liệu",
+      c: "Chọn nền tảng mới nhất trên thị trường, vì nền tảng mới thường có nhiều tính năng cộng tác hơn bản cũ",
+      d: "Chọn nền tảng lưu trữ thuộc chính bộ công cụ đang dùng, vì giảm việc quản lý tài khoản và phân quyền ở hai nơi"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 74,
+    chapter: 3,
+    text: "Một sinh viên dự định bổ sung sản phẩm vào portfolio mỗi tháng trong hai năm. Giữa công cụ cho bố cục đẹp nhưng sửa phải dựng lại từng trang, và công cụ bố cục đơn giản nhưng thêm mục rất nhanh, nên chọn theo căn cứ nào?",
+    options: {
+      a: "Chọn công cụ thêm mục nhanh, vì với hai năm cập nhật hằng tháng thì chi phí mỗi lần sửa mới là yếu tố quyết định",
+      b: "Chọn cả hai và duy trì song song, vì mỗi công cụ phục vụ một nhóm người xem khác nhau của portfolio",
+      c: "Chọn công cụ bố cục đẹp, vì sau hai năm portfolio đã hoàn chỉnh nên số lần phải sửa thực tế sẽ rất ít",
+      d: "Chọn công cụ bố cục đẹp, vì ấn tượng thị giác là điều nhà tuyển dụng đánh giá trước tiên mỗi khi mở portfolio"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 75,
+    chapter: 3,
+    text: "Một sinh viên cần gửi ba thư: hỏi lịch nộp bài gửi bạn cùng lớp, xin gia hạn gửi giảng viên, và thư ứng tuyển gửi doanh nghiệp. Mức dùng AI hợp lý cho từng thư là gì?",
+    options: {
+      a: "Cả ba thư đều nên tự viết không dùng AI, vì nhờ AI ở mức nào cũng làm thư mất đi giọng riêng của người gửi",
+      b: "Thư càng quan trọng càng dịch về phía tự viết và chỉ nhờ AI rà lỗi, vì cần thể hiện cách nghĩ của người gửi",
+      c: "Cả ba thư đều nên để AI viết rồi đổi vài từ, vì cách này tiết kiệm thời gian mà thư vẫn đủ nội dung cần",
+      d: "Thư càng quan trọng càng nên để AI soạn gần hết, vì AI viết chuẩn mực hơn và ít sai văn phong hơn người gửi"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 76,
+    chapter: 3,
+    text: "Trước khi công khai hồ sơ nghề nghiệp, trong bốn việc rà soát dưới đây, việc nào phải làm trước tiên và vì sao?",
+    options: {
+      a: "Rà lỗi chính tả toàn bộ phần mô tả, vì lỗi chính tả làm giảm mức chuyên nghiệp trong mắt người đọc",
+      b: "Đối chiếu từng mốc thời gian và chức danh với thực tế, vì thông tin sai là lỗi khó sửa nhất khi đã có người đọc",
+      c: "Kiểm tra các liên kết trong hồ sơ còn truy cập được, vì liên kết chết khiến người xem không mở được sản phẩm",
+      d: "Kiểm tra ảnh đại diện đã đủ sáng và nền đơn giản, vì ảnh là thứ người xem nhìn thấy đầu tiên khi mở hồ sơ"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 77,
+    chapter: 3,
+    text: "Nếu nội dung ghi lại giống hệt nhau, sự khác biệt giữa \"AI ghi chú họp có thông báo\" và \"nghe lén\" nằm ở đâu?",
+    options: {
+      a: "Ở thời lượng ghi âm vì nghe lén thường chỉ ghi lại một phần cuộc trao đổi",
+      b: "Ở nơi lưu trữ bản ghi vì bản ghi hợp pháp phải nằm trên máy chủ của công ty",
+      c: "Ở độ chính xác của bản ghi vì công cụ được thông báo hoạt động ổn định hơn",
+      d: "Ở quyền được biết và đồng ý của người tham gia, không nằm ở nội dung được ghi"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 78,
+    chapter: 3,
+    text: "Có hai công cụ ghi chú họp: công cụ X chỉ cần người tổ chức cho phép là bắt đầu ghi âm; công cụ Y yêu cầu từng người tham gia xác nhận đồng ý trước khi ghi. Năm 2025, một công cụ ghi chú họp phổ biến bị kiện tập thể vì chỉ xin phép người tổ chức. Nhận định nào đánh giá đúng rủi ro pháp lý của hai công cụ?",
+    options: {
+      a: "Hai công cụ rủi ro ngang nhau, vì vụ kiện chủ yếu xoay quanh việc thu phí bản ghi của người dùng",
+      b: "X an toàn hơn vì người tổ chức cuộc họp là bên chịu trách nhiệm pháp lý cho toàn bộ nội dung được ghi lại trong buổi họp",
+      c: "Y giảm rủi ro pháp lý hơn, vì mọi người tham gia đều được hỏi ý kiến và có quyền từ chối bị ghi âm",
+      d: "Y rủi ro hơn vì việc hỏi từng người sẽ làm lộ danh tính của những người tham gia cuộc họp"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 79,
+    chapter: 3,
+    text: "Nhóm làm phim tư liệu có hai nhu cầu: biên tập chung một bản thuyết minh văn bản, và chuyển các tệp video thô hàng chục gigabyte giữa các thành viên. Cách bố trí công cụ nào hợp lý?",
+    options: {
+      a: "Bản thuyết minh gửi qua thư, tệp video chia nhỏ rồi gửi dần, vì cách này đỡ phải dùng thêm công cụ mới",
+      b: "Cả hai dùng công cụ cộng tác thời gian thực, vì nhóm chỉ phải quản lý một nơi lưu trữ duy nhất",
+      c: "Cả hai dùng công cụ đồng bộ tệp lớn, vì công cụ đó chuyển được cả tệp văn bản lẫn tệp video",
+      d: "Bản thuyết minh dùng công cụ cộng tác thời gian thực, tệp video dùng công cụ mạnh về đồng bộ tệp lớn"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 80,
+    chapter: 3,
+    text: "Ngọc nhờ AI viết lại mô tả kinh nghiệm trên LinkedIn; bản AI trả về thêm chi tiết \"quản lý đội nhóm 10 người\" trong khi Ngọc mới tham gia một nhóm 4 người với vai trò thành viên. Ngọc nên xử lý thế nào?",
+    options: {
+      a: "Giữ nguyên chi tiết đó vì mô tả ấn tượng giúp hồ sơ dễ được nhà tuyển dụng chú ý hơn",
+      b: "Sửa mô tả về đúng những gì mình thực sự đã làm rồi mới cập nhật nội dung lên hồ sơ",
+      c: "Xoá hẳn mục kinh nghiệm này khỏi hồ sơ để không bị hỏi sâu khi tham gia phỏng vấn",
+      d: "Giữ chi tiết đó nhưng ghi chú thêm trong hồ sơ rằng phần mô tả do AI hỗ trợ soạn thảo"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 81,
+    chapter: 3,
+    text: "Nhóm đồ án 6 người làm trong 10 tuần, có một thành viên là sinh viên trường bạn không đăng nhập được tài khoản của trường mình. Nhóm cần một nơi vừa ghi chép ý tưởng vừa theo dõi ai làm gì, hạn nào. Có ba lựa chọn: (1) công cụ trường cấp, đủ tính năng nhưng chỉ dùng được bằng tài khoản trường; (2) công cụ nhiều tính năng báo cáo nhất, cần vài tuần để học; (3) công cụ gộp ghi chú và bảng việc, đăng nhập bằng email bất kỳ, học trong một buổi. Nhận định nào hợp lý nhất?",
+    options: {
+      a: "Chọn (3): (1) bị loại vì một thành viên không truy cập được, (2) tốn thời gian học so với dự án 10 tuần; (3) đáp ứng đủ nhu cầu",
+      b: "Chọn (2): dự án dài 10 tuần nên đáng đầu tư học công cụ mạnh nhất, các tính năng báo cáo sẽ giúp theo dõi tiến độ chính xác hơn",
+      c: "Dùng cả (1) và (3): công cụ trường cho năm thành viên trong trường, công cụ còn lại riêng cho thành viên trường bạn, cuối tuần ghép lại",
+      d: "Chọn (1): công cụ trường cấp an toàn và miễn phí, thành viên trường bạn có thể nhờ người khác cập nhật hộ phần việc của mình"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 82,
+    chapter: 3,
+    text: "Khi cần xin giảng viên gia hạn nộp báo cáo – biết giảng viên mỗi ngày nhận rất nhiều email và thường chỉ đọc lướt – một sinh viên định nhờ AI viết thư \"thật dài, thật trang trọng, kể đủ hoàn cảnh\" vì cho rằng thư càng dài càng thể hiện sự tôn trọng. Nhận định nào đánh giá đúng lập luận này?",
+    options: {
+      a: "Chưa đúng: trang trọng nằm ở lời lẽ, không ở độ dài; thư dài làm đề nghị và mốc thời gian mới bị chìm, người nhận khó thấy cần làm gì",
+      b: "Chưa đúng chỉ vì AI viết dài thì dễ bịa thêm chi tiết; nếu sinh viên tự viết dài và đúng sự thật thì thư như vậy vẫn là phù hợp",
+      c: "Đúng: thư gửi giảng viên càng dài thì càng cho thấy người viết đã đầu tư thời gian, nên AI viết dài là phù hợp với một đề nghị gia hạn",
+      d: "Chưa đúng chỉ vì thư cần ngắn gọn; còn lời lẽ thì nên thân mật như nhắn tin để giảng viên thấy gần gũi và dễ đồng ý gia hạn hơn"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 83,
+    chapter: 3,
+    text: "Nhóm làm báo cáo trên một tài liệu trực tuyến. Đến hạn nộp, phần kết luận biến mất và không ai nhận đã xoá. Thứ tự xử lý nào hợp lý nhất?",
+    options: {
+      a: "Viết lại phần kết luận ngay cho kịp hạn nộp, rồi nhắc cả nhóm cẩn thận hơn trong những lần làm sau",
+      b: "Yêu cầu từng thành viên gửi bản sao trên máy mình, rồi ghép tay phần kết luận thiếu vào bản hiện tại",
+      c: "Mở lịch sử phiên bản để tìm thời điểm còn nội dung, phục hồi, rồi chia vùng chỉnh sửa cho lần sau",
+      d: "Kết luận nền tảng bị lỗi và chuyển sang gửi tệp qua thư, để mỗi thành viên tự giữ một bản riêng"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 84,
+    chapter: 3,
+    text: "Một portfolio trình bày mỗi dự án bằng một đoạn văn kể quá trình làm và một ảnh chụp màn hình. Nhà tuyển dụng phản hồi rằng không thấy được ứng viên đã đóng góp gì. Cách cấu trúc lại từng dự án nào xử lý đúng phản hồi này?",
+    options: {
+      a: "Thay đoạn văn mô tả bằng nhiều ảnh chụp màn hình hơn, vì hình ảnh thuyết phục người đọc hơn là chữ",
+      b: "Tách bốn phần bối cảnh, phần việc của mình, kết quả đo được và ảnh, vì phản hồi nhắm vào hai phần giữa",
+      c: "Viết dài hơn và kể chi tiết hơn toàn bộ quá trình làm dự án, vì càng chi tiết thì người đọc càng hiểu rõ",
+      d: "Bổ sung tên các công cụ và công nghệ đã dùng trong dự án, vì nhà tuyển dụng quan tâm công cụ trước nhất"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 85,
+    chapter: 3,
+    text: "Bảng công việc của nhóm chỉ có hai cột \"Chưa làm\" và \"Đã xong\". Sau hai tuần, trưởng nhóm không biết việc nào đang bị tắc và ai đang quá tải. Cách sửa đúng nguyên nhân là gì?",
+    options: {
+      a: "Thêm yêu cầu mỗi thành viên báo tiến độ bằng tin nhắn mỗi ngày, vì bảng không phản ánh đúng thực tế",
+      b: "Thêm nhiều cột chia theo phần trăm hoàn thành, vì càng chi tiết thì trưởng nhóm càng nắm rõ tiến độ",
+      c: "Thêm một công cụ quản lý việc khác có báo cáo tự động, vì công cụ hiện tại thiếu tính năng thống kê",
+      d: "Thêm cột trạng thái đang thực hiện, vì thiếu trạng thái giữa thì mọi việc chưa xong đều trông như nhau"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 86,
+    chapter: 3,
+    text: "Bốn thư ứng tuyển đều có nhắc tên công ty. Thư nào đạt mức cá nhân hoá thực chất, và căn cứ phân biệt là gì?",
+    options: {
+      a: "Thư nhắc tên công ty ở cả dòng chào, đoạn mở đầu và đoạn kết để thể hiện sự chú ý tới đơn vị",
+      b: "Thư nêu đúng một dự án gần đây của công ty và nối nó với phần việc người gửi làm được",
+      c: "Thư khen ngợi công ty là đơn vị hàng đầu trong lĩnh vực và bày tỏ mong muốn được học hỏi",
+      d: "Thư nêu đầy đủ điểm mạnh của người gửi và khẳng định sẽ phù hợp với văn hoá của công ty"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 87,
+    chapter: 3,
+    text: "Cùng một tệp có thể chia sẻ theo liên kết hoặc chia sẻ cho từng địa chỉ tài khoản. Khác biệt cốt lõi ảnh hưởng tới việc quản lý về sau là gì?",
+    options: {
+      a: "Chia sẻ theo liên kết giới hạn số người xem cùng lúc, còn chia sẻ theo tài khoản thì không giới hạn số người",
+      b: "Chia sẻ theo liên kết chỉ dùng được với mức quyền xem, còn muốn cấp quyền sửa thì phải chia sẻ theo tài khoản",
+      c: "Theo tài khoản thì biết ai đang có quyền và thu hồi được từng người; theo liên kết thì không biết ai đang nắm giữ",
+      d: "Chia sẻ theo tài khoản có tốc độ mở tệp nhanh hơn, vì hệ thống không phải kiểm tra liên kết mỗi lần truy cập"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 88,
+    chapter: 3,
+    text: "Người chủ trì bật công cụ ghi chú tự động và thông báo ở phút thứ hai mươi, khi cuộc họp đã bàn xong một nội dung nhân sự. Hai vấn đề của cách làm này là gì?",
+    options: {
+      a: "Người chủ trì chưa xin phép bộ phận kỹ thuật trước khi bật công cụ, nên có thể vi phạm quy định nội bộ",
+      b: "Công cụ ghi chú cần được bật từ đầu để nhận diện giọng chính xác, bật giữa buổi làm giảm chất lượng bản ghi",
+      c: "Thông báo muộn làm bản ghi thiếu phần đầu, nên biên bản không phản ánh đủ nội dung cuộc họp",
+      d: "Phần đầu cuộc họp đã bị thu khi chưa ai được hỏi, và nội dung nhân sự vừa bàn nay đã nằm trong bản ghi"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 89,
+    chapter: 3,
+    text: "Một nhóm dự án gồm các thành viên ở Hà Nội và một đối tác ở Đức (lệch khoảng 5-6 giờ). Trong các thư trước, đối tác luôn xưng hô theo chức danh và viết rất trang trọng. Trưởng nhóm đề xuất quy tắc chung: \"Mọi tin nhắn công việc phải được trả lời trong vòng 1 giờ, và cả nhóm dùng giọng thân mật như chat nội bộ để làm việc nhanh hơn.\" Nhận định nào đánh giá đúng đề xuất này?",
+    options: {
+      a: "Chỉ chưa hợp lý ở giọng văn; mốc 1 giờ nên giữ, vì trả lời chậm luôn bị coi là thiếu tôn trọng người gửi",
+      b: "Chưa hợp lý cả hai điểm: lệch múi giờ làm mốc 1 giờ không khả thi, mức thân mật cần theo văn hoá đối tác",
+      c: "Hợp lý: phản hồi nhanh và giọng thân mật đều giúp rút ngắn khoảng cách, nên có thể áp dụng chung cho cả nhóm",
+      d: "Chỉ chưa hợp lý ở mốc thời gian; giọng thân mật nên giữ, vì chat công việc vốn không cần sự trang trọng"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 90,
+    chapter: 3,
+    text: "Nhóm phỏng vấn trực tuyến một chuyên gia bên ngoài. Chuyên gia đồng ý cho nhóm ghi chú nội dung, nhưng không đồng ý để giọng nói của mình bị ghi âm và lưu lại. Công cụ AI của nhóm chỉ hoạt động bằng cách ghi âm cả buổi rồi tóm tắt, bản ghi âm được lưu 30 ngày. Nhóm lập luận: \"Chuyên gia đã đồng ý ghi chú, vậy bật công cụ là được.\" Nhận định nào đánh giá đúng lập luận này?",
+    options: {
+      a: "Đúng nếu nhóm xoá bản ghi âm ngay sau buổi phỏng vấn, vì khi đó dữ liệu giọng nói không còn tồn tại nên không còn vấn đề gì nữa",
+      b: "Đúng: ghi âm chỉ là bước kỹ thuật để tạo bản ghi chú, nên khi chuyên gia đã đồng ý ghi chú thì cũng coi như đã đồng ý để ghi âm",
+      c: "Chưa đúng: nhóm phải huỷ buổi phỏng vấn, vì khi khách mời từ chối ghi âm thì không còn cách nào lưu lại nội dung để làm báo cáo",
+      d: "Chưa đúng: sự đồng ý chỉ trong phạm vi ghi chú; công cụ ghi âm và lưu bản ghi đã vượt phạm vi đó, nên cần ghi chép thủ công"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 91,
+    chapter: 3,
+    text: "Khảo sát Microsoft Work Trend Index 2025 đưa ra ba số liệu: người lao động bị gián đoạn 275 lần mỗi ngày, 60% cuộc họp là đột xuất, và 29% người lao động tiết kiệm ít nhất 1 giờ mỗi ngày nhờ AI. Kết luận nào được cả ba số liệu này ủng hộ?",
+    options: {
+      a: "71% người lao động còn lại không tiết kiệm được thời gian vì họ từ chối sử dụng công cụ AI",
+      b: "Công cụ AI là nguyên nhân trực tiếp gây ra 275 lần gián đoạn mỗi ngày của người lao động",
+      c: "Môi trường làm việc số bị phân mảnh cao, nhưng người biết dùng AI vẫn giành lại được thời gian",
+      d: "60% người lao động hiện đã biết dùng AI để lên lịch trước cho các cuộc họp trong ngày làm việc"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 92,
+    chapter: 3,
+    text: "Trong các nền tảng họp trực tuyến như Google Meet và Microsoft Teams, \"AI note-taker\" (AI ghi chú họp) là tính năng như thế nào?",
+    options: {
+      a: "Tự động lên lịch và gửi lời mời cho các cuộc họp định kỳ của cả nhóm",
+      b: "Tự động dịch lời thoại trong cuộc họp sang ngôn ngữ khác của người dự",
+      c: "Tự động nghe, ghi nội dung và tạo tóm tắt kèm danh sách việc cần làm",
+      d: "Tự động chấm điểm mức độ đóng góp phát biểu của từng thành viên dự họp"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 93,
+    chapter: 3,
+    text: "Cách hiểu nào diễn giải đúng bài học \"email tốt bằng cấu trúc của AI cộng với sự thật và giọng nói của chính người viết\"?",
+    options: {
+      a: "Người viết nên soạn phần cấu trúc, sau đó để AI tự bổ sung các dữ kiện và kinh nghiệm phù hợp",
+      b: "AI soạn gần như trọn nội dung thư, còn người viết rà lại lỗi chính tả và ngữ pháp trước khi bấm gửi",
+      c: "AI lo phần khung trôi chảy, còn người viết bổ sung dữ kiện thật và dấu ấn cá nhân qua bước biên tập",
+      d: "AI và người viết mỗi bên soạn một bản riêng, sau đó ghép các đoạn hay nhất lại thành email hoàn chỉnh"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 94,
+    chapter: 3,
+    text: "Cách hiểu nào đúng về \"nhóm 29%\" trong số liệu khảo sát Microsoft Work Trend Index 2025 về môi trường làm việc số?",
+    options: {
+      a: "Nhóm doanh nghiệp đã đưa được công cụ AI vào quy trình làm việc nội bộ",
+      b: "Nhóm người lao động nhờ biết dùng AI mà tiết kiệm được ít nhất một giờ mỗi ngày",
+      c: "Nhóm các cuộc họp đã được lên lịch trước thay vì diễn ra đột xuất trong ngày",
+      d: "Nhóm người lao động bị gián đoạn công việc nhiều nhất trong số giờ làm mỗi ngày"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 95,
+    chapter: 3,
+    text: "Công ty nơi Trang thực tập đã triển khai trọn bộ Microsoft 365 với Outlook, Word, Excel cho toàn bộ nhân viên. Khi nhóm cần một nền tảng chat có AI tóm tắt, Trang nên đề xuất thế nào?",
+    options: {
+      a: "Dùng Microsoft Teams vì tổ chức đã ở sẵn trong hệ sinh thái Microsoft 365",
+      b: "Dùng song song cả Slack lẫn Teams để tận dụng thế mạnh của từng nền tảng",
+      c: "Chuyển cả nhóm sang Slack vì giao diện gọn nhẹ và nhiều tích hợp bên thứ ba",
+      d: "Quay về trao đổi qua email nội bộ vì chat nhóm khó quản lý thông tin hơn"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 96,
+    chapter: 3,
+    text: "Khi dùng AI hỗ trợ soạn email xin thực tập, ba kỹ năng người học cần rèn là những kỹ năng nào?",
+    options: {
+      a: "Viết prompt đủ yếu tố, biên tập giữ giọng cá nhân, kiểm tra dữ kiện trước khi gửi",
+      b: "Cài đặt trợ lý AI, so sánh nhiều mô hình ngôn ngữ, đo tốc độ phản hồi của công cụ",
+      c: "Viết prompt đủ yếu tố, thiết lập mẫu thư dùng chung, gửi hàng loạt cho nhiều công ty",
+      d: "Tra cứu cơ sở dữ liệu học thuật, trích dẫn nguồn, quản lý thư mục tài liệu tham khảo"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 97,
+    chapter: 3,
+    text: "Nhóm soạn báo cáo trên một nền tảng đám mây có lưu lịch sử phiên bản. Sau một lần có người xoá nhầm nội dung trên tài liệu dùng chung, một thành viên đề xuất: \"Từ nay mỗi người sửa một bản Word riêng rồi gửi email, trưởng nhóm ghép lại; như vậy an toàn hơn vì không ai xoá được phần của người khác.\" Nhận định nào đánh giá đúng đề xuất này?",
+    options: {
+      a: "Chưa hợp lý chỉ vì email có giới hạn dung lượng; nếu đổi sang gửi qua ứng dụng nhắn tin thì cách làm việc theo bản riêng sẽ ổn",
+      b: "Chưa hợp lý: lịch sử phiên bản đã cho khôi phục nội dung xoá nhầm, còn gửi file riêng lại tạo nhiều bản lệch nhau và tốn công ghép",
+      c: "Chưa hợp lý chỉ vì trưởng nhóm sẽ quá tải khi ghép; nếu cả nhóm luân phiên ghép bài theo tuần thì cách gửi file riêng là hợp lý",
+      d: "Hợp lý: tách bản riêng cho từng người là cách duy nhất để ngăn hoàn toàn việc xoá nhầm, nên đáng đổi lấy thêm chút thời gian ghép bài"
+    },
+    correctAnswer: "b"
+  },
+
+  // CHƯƠNG 4 (Câu 98 - 129)
+  {
+    id: 98,
+    chapter: 4,
+    text: "Câu lạc bộ dùng giọng đọc AI cho hai video: (1) video hướng dẫn 20 bước dùng phần mềm, lời bình phải sửa nhiều lần mỗi khi phần mềm cập nhật; (2) video cảm ơn nhà tài trợ, trong đó chủ nhiệm kể lại trải nghiệm cá nhân của câu lạc bộ. Nhận định nào đánh giá đúng lựa chọn này?",
+    options: {
+      a: "Hợp lý với video (1) vì sửa lời bình chỉ cần sửa kịch bản; chưa hợp với video (2) vì video này cần sự chân thật, cảm xúc của người thật",
+      b: "Hợp lý với video (2) vì nhà tài trợ cần một video chuyên nghiệp; chưa hợp với video (1) vì hướng dẫn kỹ thuật cần giọng của người dạy",
+      c: "Chưa hợp lý với cả hai video, vì video của câu lạc bộ phải do thành viên tự đọc lời bình thì mới đáp ứng được yêu cầu về liêm chính",
+      d: "Hợp lý với cả hai video vì giọng đọc AI hiện nay đã rất tự nhiên, người xem khó phân biệt nên không ảnh hưởng tới hiệu quả của video"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 99,
+    chapter: 4,
+    text: "Nguyên tắc xuyên suốt của quy định pháp luật hiện hành về trí tuệ nhân tạo, và cũng là nguyên tắc nền của cả học phần, được phát biểu như thế nào?",
+    options: {
+      a: "AI phải được kiểm định chất lượng định kỳ bởi một tổ chức độc lập trước mỗi lần phát hành bản mới",
+      b: "AI là chủ thể độc lập, tự chịu trách nhiệm về các kết quả mà nó tạo ra cho người dùng",
+      c: "AI chỉ được sử dụng trong các lĩnh vực đã được cơ quan quản lý cấp phép trước bằng văn bản",
+      d: "AI là công cụ hỗ trợ, quyết định cuối cùng vẫn thuộc về con người"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 100,
+    chapter: 4,
+    text: "Phòng kỹ thuật nhờ một nhân viên tách nền một ảnh thiết bị nội bộ kèm yêu cầu ảnh không được tải lên bất kỳ dịch vụ trực tuyến nào. Phương án phù hợp là gì?",
+    options: {
+      a: "Dùng Canva BG Remover rồi xoá ảnh khỏi tài khoản ngay sau khi tải kết quả xuống máy",
+      b: "Dùng remove.bg bản miễn phí vì dịch vụ này xử lý xong ảnh tải lên chỉ trong vài giây",
+      c: "Dùng GIMP hoặc Photoshop tách nền thủ công ngay trên máy để ảnh không rời khỏi máy",
+      d: "Dùng Adobe Firefly vì công cụ trả phí của hãng lớn nên dữ liệu tải lên được bảo đảm hơn"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 101,
+    chapter: 4,
+    text: "Một bộ ảnh đã tách nền sẽ được ghép lên nhiều nền màu khác nhau. Hiện trạng: viền mượt khi soi ở mức phóng to 200%, thiếu bóng đổ nhưng nhìn vẫn chấp nhận được, và một tệp bị xuất ra dạng JPG. Việc cần ưu tiên khắc phục là gì?",
+    options: {
+      a: "Giảm độ phân giải cả bộ ảnh cho đồng đều, vì kích thước tệp lệch nhau là lỗi nặng nhất",
+      b: "Thêm bóng đổ cho cả bộ ảnh, vì thiếu bóng đổ là lỗi nặng nhất xét theo tiêu chí ánh sáng",
+      c: "Xuất lại tệp đó sang dạng PNG, vì xuất JPG khi ảnh cần đem ghép là lỗi nặng nhất ở đây",
+      d: "Làm lại viền tách nền cho cả bộ ảnh, vì viền mượt ở mức 200% vẫn chưa đủ cho khổ in lớn"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 102,
+    chapter: 4,
+    text: "Một báo cáo số liệu gồm bốn phần: bảng tổng hợp, mô tả xu hướng, diễn giải nguyên nhân, và đề xuất hành động. Cách phân chia việc giữa AI và người nào hợp lý nhất?",
+    options: {
+      a: "AI làm cả bốn phần rồi người đọc lại một lượt, vì như vậy tiết kiệm được nhiều thời gian nhất cho người viết",
+      b: "Người làm bảng tổng hợp và mô tả xu hướng; AI viết phần diễn giải nguyên nhân và đề xuất hành động",
+      c: "AI làm bảng tổng hợp và bản nháp mô tả xu hướng; người viết phần diễn giải nguyên nhân và đề xuất hành động",
+      d: "AI làm bảng tổng hợp; người viết ba phần còn lại, vì mô tả xu hướng cũng cần hiểu bối cảnh của đơn vị"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 103,
+    chapter: 4,
+    text: "Trong xử lý ảnh bằng AI, \"tách nền\" (background removal) được định nghĩa là thao tác gì?",
+    options: {
+      a: "Dùng AI cắt riêng phần nền của một ảnh để lưu thành một file ảnh độc lập",
+      b: "Dùng AI thay phần nền của một ảnh bằng một nền khác do người dùng tải lên",
+      c: "Dùng AI tự động nhận diện và loại bỏ phần nền của một ảnh, giữ lại chủ thể chính",
+      d: "Dùng AI tự động làm mờ phần nền của một ảnh để làm nổi bật chủ thể chính của bức ảnh"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 104,
+    chapter: 4,
+    text: "Một câu lạc bộ cần bộ slide dùng chung cho các buổi sinh hoạt trong hai năm, thống nhất màu, phông và vị trí logo. Tiêu chí chọn công cụ nào quyết định?",
+    options: {
+      a: "Khả năng chỉnh sửa cùng lúc nhiều người, vì câu lạc bộ có nhiều thành viên tham gia làm slide",
+      b: "Khả năng tự dựng bố cục từ văn bản, vì như vậy mỗi buổi sinh hoạt dựng slide sẽ nhanh hơn nhiều",
+      c: "Số lượng hiệu ứng chuyển slide có sẵn, vì hiệu ứng làm buổi sinh hoạt sinh động hơn với người dự",
+      d: "Khả năng lưu một bộ mẫu dùng lại được, để các buổi sau chỉ đổi nội dung mà giữ nguyên nhận diện"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 105,
+    chapter: 4,
+    text: "Một đồ án 80 trang định dạng tiêu đề bằng cách tự tô đậm và tăng cỡ chữ. Khi hoàn thiện, nhóm gặp ba vấn đề: mục lục tự động không liệt kê được tiêu đề nào; khung điều hướng không hiện cấu trúc chương mục; số mục phải sửa tay mỗi khi chèn mục mới. Nguyên nhân gốc chung của ba vấn đề là gì?",
+    options: {
+      a: "Văn bản 80 trang vượt quá giới hạn xử lý của các chức năng tự động trong trình soạn thảo",
+      b: "Cỡ chữ các tiêu đề không đồng đều nên phần mềm không xác định được cấp của từng dòng tiêu đề",
+      c: "Mục lục được chèn trước khi hoàn thiện nội dung nên không theo kịp các mục viết thêm về sau",
+      d: "Tiêu đề chỉ giống tiêu đề về hình thức, phần mềm không nhận ra cấu trúc cấp bậc của văn bản"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 106,
+    chapter: 4,
+    text: "Một nhóm dùng AI dựng bộ slide bảo vệ đồ án từ dàn ý. Bộ slide có bố cục đẹp, thống nhất màu, phông và đúng trình tự dàn ý. Tuy nhiên, slide kết quả dùng ảnh minh hoạ chung chung do AI tự chọn và một biểu đồ AI tự vẽ \"minh hoạ xu hướng\", không lấy từ dữ liệu của đồ án. Nhận định nào đánh giá đúng bộ slide?",
+    options: {
+      a: "Chưa đạt: phần kết quả phải dùng hình, biểu đồ thật từ đồ án; bố cục đẹp và đúng dàn ý không bù được nội dung minh hoạ sai lệch",
+      b: "Đạt nếu nhóm ghi thêm dòng chú thích \"hình minh hoạ\" dưới biểu đồ, vì khi đó hội đồng sẽ hiểu đây không phải số liệu thật của đồ án",
+      c: "Chưa đạt: nhóm phải bỏ bộ slide do AI dựng và làm lại toàn bộ bằng tay, vì hội đồng bảo vệ không chấp nhận slide có dùng công cụ AI",
+      d: "Đạt: bố cục, màu sắc và trình tự đều đúng yêu cầu, còn hình ảnh chỉ có vai trò minh hoạ nên không ảnh hưởng tới nội dung bảo vệ đồ án"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 107,
+    chapter: 4,
+    text: "Với sản phẩm học tập, cách gắn nhãn an toàn được khuyến nghị là làm đồng thời ba lớp. Ba lớp đó là gì và vì sao không lớp nào thay được lớp nào?",
+    options: {
+      a: "Siêu dữ liệu của tệp, nhãn nhìn thấy trên nội dung, và mật khẩu bảo vệ tệp cùng nhằm ngăn người khác chỉnh sửa lại nội dung đã gắn nhãn",
+      b: "Nhãn nhìn thấy trên nội dung, chú thích trong tài liệu, bản khai báo mức độ dùng AI nộp kèm mỗi lớp phục vụ một kiểu người đọc và tồn tại ở một hoàn cảnh khác",
+      c: "Nhãn nhìn thấy trên nội dung, chữ ký số của người nộp, và bản cam kết không sao chép ba lớp cùng nhằm đáp ứng yêu cầu của hệ thống chống đạo văn",
+      d: "Ghi tên công cụ AI vào phần tác giả, đặt tệp ở chế độ chỉ đọc, và lưu lịch sử trò chuyện với AI ba lớp cùng nhằm chứng minh quyền tác giả của người nộp bài"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 108,
+    chapter: 4,
+    text: "Một nhóm chỉ dán tên đề tài cùng vài từ khoá vào công cụ tạo slide, nhận về bộ slide nội dung chung chung, rồi kết luận rằng công cụ này chất lượng kém. Điểm sai trong lập luận của nhóm nằm ở đâu?",
+    options: {
+      a: "Nhóm quy kết cho công cụ trong khi nguyên nhân là dàn ý đầu vào sơ sài, thiếu ý chính của từng slide",
+      b: "Nhóm đã chọn sai phong cách trình bày nên bố cục sinh ra lệch hẳn so với yêu cầu của một buổi bảo vệ",
+      c: "Nhóm dùng gói miễn phí nên công cụ đã hạ chất lượng nội dung của bộ slide được sinh ra cho tài khoản đó",
+      d: "Nhóm quên xuất tệp trình chiếu nên phần nội dung chi tiết bị lược bớt khi hiển thị trên trình duyệt web"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 109,
+    chapter: 4,
+    text: "Một nhân viên nhờ AI so sánh doanh thu hai quý và nhận được nhận xét: \"Quý sau tăng 18%, cho thấy chiến dịch quảng cáo hiệu quả\". Trước khi đưa nhận xét này vào báo cáo, cần kiểm tra những gì?",
+    options: {
+      a: "Con số 18% có đúng không, và việc quy mức tăng cho chiến dịch có căn cứ trong dữ liệu hay suy diễn",
+      b: "Nhận xét có đủ dài để đưa vào phần kết luận của báo cáo hay cần yêu cầu công cụ viết thêm vài câu nữa",
+      c: "Công cụ đã dùng đúng loại biểu đồ để trình bày phần so sánh giữa hai quý của báo cáo hay chưa",
+      d: "Hai quý có cùng số ngày làm việc hay không, vì số ngày khác nhau thì tỉ lệ phần trăm không tính được"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 110,
+    chapter: 4,
+    text: "Ba sinh viên nộp ảnh tách nền để ghép vào poster: bản thứ nhất viền hơi kém mượt ở vài điểm, bản thứ hai sản phẩm bị biến dạng rõ rệt, bản thứ ba xuất ra tệp có nền trắng đặc. Đối chiếu với tiêu chí chất lượng tách nền (viền, tính nguyên vẹn chi tiết, định dạng xuất giữ nền trong suốt), cách đánh giá nào đúng?",
+    options: {
+      a: "Cả ba bản chấp nhận được vì sai khác giữa các lần chạy công cụ AI là chuyện bình thường khi xử lý ảnh",
+      b: "Bản thứ ba chấp nhận được; bản thứ nhất và bản thứ hai mang dấu hiệu làm sai và phải xử lý lại",
+      c: "Cả ba bản mang dấu hiệu làm sai vì viền tách nền của mỗi bản đều lệch so với một ảnh mẫu chuẩn",
+      d: "Bản thứ nhất chấp nhận được; bản thứ hai và bản thứ ba mang dấu hiệu làm sai và phải xử lý lại"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 111,
+    chapter: 4,
+    text: "Một sinh viên dùng ảnh do AI tạo cho ba việc: (a) minh hoạ bài tập nộp giảng viên; (b) đăng trên trang mạng xã hội cá nhân, không thu phí; (c) in lên bao bì sản phẩm bán ra thị trường cho cửa hàng của gia đình. Nhận định nào về mức kiểm tra cần thiết là đúng?",
+    options: {
+      a: "(a) rủi ro cao nhất vì liên quan liêm chính học thuật; (c) chỉ cần gắn nhãn \"ảnh do AI tạo\" trên bao bì là đáp ứng đủ yêu cầu pháp lý",
+      b: "Chỉ (b) cần kiểm tra vì đăng công khai cho nhiều người xem; (a) và (c) không cần vì một bên nộp nội bộ, một bên là cửa hàng gia đình",
+      c: "Cả ba việc có cùng mức rủi ro, vì ảnh đều do cùng một công cụ AI tạo ra, nên chỉ cần kiểm tra điều khoản của công cụ đó một lần là đủ",
+      d: "(c) rủi ro cao nhất: phải đọc điều khoản thương mại, kiểm cam kết bồi thường của công cụ; (a) rủi ro thấp nhưng vẫn cần khai báo"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 112,
+    chapter: 4,
+    text: "Một sinh viên dùng AI tạo một bức ảnh trông như ảnh chụp thật để minh hoạ bài đăng của câu lạc bộ, rồi nói: \"ảnh này do tôi tạo nên tôi có quyền dùng, vậy không cần ghi gì thêm\". Lập luận này sai ở đâu?",
+    options: {
+      a: "Nghĩa vụ gắn nhãn chỉ áp dụng cho sản phẩm thương mại, nên bài đăng của câu lạc bộ sinh viên được miễn",
+      b: "Nghĩa vụ gắn nhãn thuộc về nhà cung cấp công cụ AI, nên người đăng ảnh không phải ghi thêm gì cả",
+      c: "Quyền dùng ảnh đã bao gồm nghĩa vụ gắn nhãn, nên chỉ cần ghi tên người tạo ảnh là đủ cả hai nghĩa vụ",
+      d: "Có quyền dùng không thay nghĩa vụ gắn nhãn: ảnh trông như thật thì người xem phải được biết là do AI tạo"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 113,
+    chapter: 4,
+    text: "Ảnh một chiếc túi có quai da mảnh và tua rua nhỏ sẽ được tách nền để in poster khổ lớn – nơi mọi lỗi viền đều bị phóng đại. Trong tình huống này, cách chọn phương án tách nền hợp lý nhất là gì?",
+    options: {
+      a: "Cắt bỏ phần quai da và tua rua khỏi khung hình để không phải xử lý các chi tiết viền mảnh khó tách",
+      b: "Chọn phương án xử lý nhanh nhất, vì thời gian ngắn chứng tỏ thuật toán nhận diện viền chính xác hơn",
+      c: "Chọn phương án không mất phí, vì chi phí bằng không là tiêu chí quan trọng nhất với poster khổ lớn",
+      d: "Thử trên chính ảnh đó ở vài phương án, soi viền ở mức phóng to và chọn phương án cho viền mảnh đẹp nhất"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 114,
+    chapter: 4,
+    text: "Một bạn cùng nhóm đề xuất dùng ElevenLabs nhân bản giọng của giảng viên hướng dẫn (chưa hỏi ý kiến thầy) để đọc lời giới thiệu video cho \"thêm uy tín\". Phản hồi đúng là gì?",
+    options: {
+      a: "Từ chối, vì giọng nhân bản thường kém tự nhiên sẽ làm giảm chất lượng âm thanh của video",
+      b: "Đồng ý nhưng ghi dòng chữ nhỏ 'giọng đọc AI' cuối video là đủ hoàn thành nghĩa vụ pháp lý",
+      c: "Từ chối, vì giả giọng người có thật khi chưa được phép là vượt ranh giới pháp lý và đạo đức",
+      d: "Đồng ý, vì video chỉ phục vụ học tập trong trường nên không cần xin phép người có giọng nói"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 115,
+    chapter: 4,
+    text: "Bạn A dùng AI tạo bố cục slide, sau đó tự thay toàn bộ nội dung, số liệu, hình ảnh bằng sản phẩm thật của mình và giải thích được vì sao giữ, sửa hay bỏ từng phần. Bạn B nhận xét: \"Slide do AI thiết kế thì không còn là sản phẩm của A nữa.\" Nhận định nào đánh giá đúng nhận xét của B?",
+    options: {
+      a: "Chưa đúng: điều quyết định là A tự làm nội dung, tự quyết định giữ, sửa, bỏ và giải thích được từng lựa chọn, không phải ai dựng bố cục",
+      b: "Chưa đúng: sản phẩm là của A vì A đã trả phí cho công cụ AI, nên mọi kết quả công cụ tạo ra đều thuộc quyền của người đã trả tiền dùng",
+      c: "Đúng: phần bố cục là phần người xem thấy đầu tiên, nên khi AI làm bố cục thì sản phẩm đã thuộc về công cụ chứ không còn là của bạn A",
+      d: "Đúng một phần: sản phẩm chỉ còn là của A nếu A không dùng AI ở bất kỳ khâu nào, kể cả khâu dựng bố cục và chọn màu sắc cho bộ slide"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 116,
+    chapter: 4,
+    text: "Quy tắc chọn định dạng ảnh theo mục đích sử dụng (ghép vào slide/poster hay đăng lên mạng) được tóm tắt như thế nào?",
+    options: {
+      a: "Ghép dùng PNG, đăng dùng BMP",
+      b: "Ghép dùng PNG, đăng dùng JPG",
+      c: "Ghép dùng GIF, đăng dùng JPG",
+      d: "Ghép dùng JPG, đăng dùng PNG"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 117,
+    chapter: 4,
+    text: "Heading Style (kiểu định dạng tiêu đề) trong trình soạn thảo văn bản được định nghĩa là gì?",
+    options: {
+      a: "Kiểu chữ in đậm cỡ lớn do người dùng tự thiết lập thủ công để làm nổi bật các dòng tiêu đề quan trọng trong văn bản",
+      b: "Bộ mẫu trang trí trang bìa và tiêu đề chương có sẵn trong kho mẫu của Word và Google Docs",
+      c: "Tính năng tự động dịch các tiêu đề chương mục sang ngôn ngữ khác trong trình soạn thảo văn bản",
+      d: "Kiểu định dạng tiêu đề có cấu trúc giúp tạo mục lục tự động và giúp phần mềm nhận diện đúng cấu trúc văn bản"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 118,
+    chapter: 4,
+    text: "Một thực tập sinh thiết kế quy trình báo cáo tuần: yêu cầu Copilot tạo PivotTable và biểu đồ, yêu cầu Copilot viết đoạn nhận xét, chép cả ba sang sheet báo cáo rồi gửi quản lý. Quy trình này còn thiếu khâu quan trọng nào?",
+    options: {
+      a: "In bản báo cáo ra giấy và lưu theo từng tuần để tiện đối chiếu vào cuối kỳ thực tập tại đơn vị",
+      b: "Yêu cầu công cụ AI tự chấm điểm độ tin cậy cho từng con số trong bảng tổng hợp mà nó vừa tạo ra",
+      c: "Chuyển dữ liệu bán hàng thô sang một tệp riêng và đặt mật khẩu cho tệp đó trước khi mở công cụ AI",
+      d: "Đối chiếu ít nhất một giá trị của bảng bằng cách cộng tay và đọc lại đoạn nhận xét trước khi gửi"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 119,
+    chapter: 4,
+    text: "Trước khi dùng bộ ảnh đã tách nền cho poster bán hàng, cần kiểm tra chất lượng ảnh bằng cách nào?",
+    options: {
+      a: "Phóng to viền ở mức 200% soi răng cưa, quầng trắng và đặt thử ảnh lên nền màu khác",
+      b: "So sánh dung lượng file trước và sau xử lý; dung lượng giảm chứng tỏ nền đã được tách",
+      c: "Gửi ảnh cho vài người bạn xem qua điện thoại rồi hỏi cảm nhận chung về độ đẹp của ảnh",
+      d: "Nhìn lướt toàn bộ ảnh ở chế độ thu nhỏ; nếu trông ổn ở cỡ nhỏ thì có thể mang in ngay"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 120,
+    chapter: 4,
+    text: "Hai báo cáo được nộp để chuẩn hoá theo mẫu. Báo cáo P không có lỗi chính tả nào; tiêu đề các mục được tự tô đậm, tăng cỡ chữ, và mục lục được gõ tay, hiện khớp số trang. Báo cáo Q dùng Heading Style cho mọi tiêu đề và có mục lục tự động, nhưng còn hai lỗi chính tả trong thân bài. Nhận định nào đánh giá đúng hai báo cáo?",
+    options: {
+      a: "P tốt hơn Q vì không có lỗi chính tả nào và mục lục đang khớp số trang, còn cách tạo tiêu đề chỉ là khác biệt về thao tác giữa hai người",
+      b: "Q đạt về cấu trúc, chỉ cần sửa hai lỗi chính tả; P sai ở gốc vì máy không nhận ra tiêu đề, mục lục sẽ lệch ngay khi nội dung thay đổi",
+      c: "Hai báo cáo ngang nhau vì mỗi báo cáo mắc đúng một loại lỗi, nên người chấm có thể cho cùng mức điểm mà không cần xét thêm gì khác",
+      d: "Q kém hơn P vì lỗi chính tả là lỗi người đọc thấy ngay, còn việc tiêu đề có dùng Heading Style hay không thì người đọc không nhận ra"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 121,
+    chapter: 4,
+    text: "Một báo cáo kỹ thuật gồm phần mở đầu viết bằng ngôn ngữ phổ thông và phần kết quả dày đặc thuật ngữ chuyên ngành, ký hiệu và công thức. Khi dùng AI kiểm tra ngữ pháp hỗ trợ rà soát, cách phân bổ công sức nào hợp lý nhất?",
+    options: {
+      a: "Đọc kỹ phần mở đầu bằng mắt và giao trọn phần kết quả nhiều công thức cho công cụ tự quyết định",
+      b: "Duyệt nhanh gợi ý chính tả ở phần mở đầu, dành thời gian đọc kỹ bằng mắt ở phần nhiều thuật ngữ",
+      c: "Chạy công cụ kiểm tra ngữ pháp thêm vài lượt cho tới khi không còn dòng nào bị gạch chân trong bài",
+      d: "Chấp nhận các gợi ý của công cụ ở cả hai phần vì công cụ đã được huấn luyện trên văn bản kỹ thuật"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 122,
+    chapter: 4,
+    text: "Một \"sản phẩm số chuyên nghiệp\" được tóm tắt gồm ba lớp nào, mà thiếu bất kỳ lớp nào cũng gây rủi ro?",
+    options: {
+      a: "Độ dài của sản phẩm, số công cụ AI dùng kèm và lượng ảnh minh hoạ",
+      b: "Điểm số được chấm, lượt thích trên mạng và số người chia sẻ lại bài",
+      c: "Tốc độ hoàn thành, chi phí công cụ thấp và số lượng hiệu ứng đẹp",
+      d: "Chất lượng nội dung, dấu ấn cá nhân và sự sạch sẽ về bản quyền"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 123,
+    chapter: 4,
+    text: "Xét ba sản phẩm sau: (1) ảnh sinh ra từ một câu lệnh ngắn, không sửa gì; (2) ảnh sinh ra rồi được ghép, chỉnh sáng, thêm chú thích thành một áp phích; (3) bản vẽ do người tự dựng, AI chỉ tô màu theo chỉ dẫn từng vùng. Sản phẩm nào khó được bảo hộ nhất và căn cứ là gì?",
+    options: {
+      a: "Sản phẩm (3), vì AI đã tham gia vào khâu tô màu nên bản vẽ không còn được coi là tác phẩm của con người",
+      b: "Sản phẩm (2), vì phần lõi của áp phích vẫn là ảnh do AI sinh, việc ghép và chỉnh sáng chỉ là thao tác kỹ thuật",
+      c: "Cả ba đều khó bảo hộ như nhau, vì có AI tham gia vào quá trình tạo ra thì quyền tác giả không hình thành",
+      d: "Sản phẩm (1), vì phần đóng góp sáng tạo của con người chỉ là một câu lệnh, không đủ để hình thành quyền tác giả"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 124,
+    chapter: 4,
+    text: "Công cụ kiểm ngữ pháp đánh dấu ba chỗ trong đồ án: một câu bị động dài, một tên riêng nước ngoài, và một ký hiệu đơn vị đo. Cách xử lý ba chỗ này khác nhau ra sao?",
+    options: {
+      a: "Sửa cả ba theo gợi ý của công cụ, vì công cụ được xây trên tập dữ liệu lớn nên gợi ý thường đúng hơn cảm nhận",
+      b: "Sửa hai chỗ tên riêng và ký hiệu theo chuẩn của công cụ, giữ câu bị động vì văn phong khoa học ưu tiên bị động",
+      c: "Xem lại câu bị động vì có thể viết gọn hơn; bỏ qua tên riêng và ký hiệu vì công cụ dễ hiểu nhầm chúng là lỗi",
+      d: "Bỏ qua cả ba vì đây là văn bản chuyên ngành, công cụ kiểm ngữ pháp không dùng được cho loại văn bản này"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 125,
+    chapter: 4,
+    text: "Phòng kinh doanh nhờ một thực tập sinh làm bộ slide trong một ngày, có số liệu doanh thu nội bộ chưa công bố. Công ty dùng bộ phần mềm văn phòng có sẵn công cụ AI tạo slide đã được phép dùng. Có ba lựa chọn: (1) công cụ AI trong bộ phần mềm của công ty; (2) một công cụ trực tuyến bên ngoài, chưa có trong danh mục công ty cho phép, dựng slide nhanh và đẹp nhất; (3) làm tay toàn bộ. Nhận định nào hợp lý nhất?",
+    options: {
+      a: "Chọn (3): làm tay là cách duy nhất bảo đảm an toàn dữ liệu, nên dù mất nhiều thời gian thì vẫn nên ưu tiên hơn mọi công cụ có dùng AI",
+      b: "Chọn (1): (2) bị loại vì đưa số liệu nội bộ lên dịch vụ chưa được phép, (3) khó kịp trong một ngày; tốc độ và độ đẹp chỉ xét sau",
+      c: "Chọn (2) nhưng xoá các con số trước khi tải lên rồi điền tay lại sau, vì như vậy vừa được slide đẹp vừa không làm lộ số liệu nội bộ",
+      d: "Chọn (2): công cụ đẹp và nhanh nhất giúp bộ slide gây ấn tượng, và số liệu chỉ nằm trên slide nên rủi ro lộ thông tin là không đáng kể"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 126,
+    chapter: 4,
+    text: "Một sinh viên dùng AI hỗ trợ chuẩn hoá báo cáo văn bản và tự kiểm tra phần trình bày trước khi nộp. Dấu hiệu nào cho thấy phần văn bản đạt yêu cầu?",
+    options: {
+      a: "Báo cáo dùng cùng một cỡ chữ cho phần tiêu đề và phần thân bài để bố cục trông thật gọn gàng",
+      b: "Báo cáo dài đúng số trang quy định và được lưu sang định dạng PDF trước khi nộp cho giảng viên",
+      c: "Báo cáo có mục lục tự động, heading nhất quán toàn bài và không còn lỗi chính tả rõ rệt",
+      d: "Báo cáo đã chạy qua công cụ AI hai lượt và các gợi ý sửa của công cụ đều đã được chấp nhận hết"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 127,
+    chapter: 4,
+    text: "Sinh viên xuất ảnh do AI tạo, tệp có kèm siêu dữ liệu xuất xứ ghi rõ ảnh được sinh bởi AI, rồi đăng ảnh lên một nền tảng mạng xã hội và coi như đã hoàn thành nghĩa vụ gắn nhãn. Lập luận này sai ở đâu?",
+    options: {
+      a: "Siêu dữ liệu phải được đăng ký với cơ quan quản lý trước khi công bố, nên tự ghi vào tệp là chưa đủ",
+      b: "Siêu dữ liệu hay bị nền tảng lược bỏ khi tải lên và người xem không mở ra đọc, nên chưa đạt mục tiêu thông báo",
+      c: "Siêu dữ liệu chỉ có giá trị với ảnh in ra giấy, nên với ảnh hiển thị trên màn hình thì phải dùng hình thức khác",
+      d: "Siêu dữ liệu là bằng chứng kỹ thuật mạnh hơn nhãn chữ, nên được ưu tiên áp dụng khi có tranh chấp về nội dung"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 128,
+    chapter: 4,
+    text: "Dưới đây là bốn phát biểu về một tài nguyên có giấy phép mở kèm điều kiện phi thương mại. Phát biểu nào SAI và vì sao?",
+    options: {
+      a: "Dùng trong video không bật kiếm tiền được, nhưng phải ghi công tác giả theo đúng yêu cầu của giấy phép",
+      b: "Dùng trong bài tập trên lớp được, vì đây là sử dụng cho mục đích học tập và không tạo ra doanh thu",
+      c: "Dùng trong tài liệu nội bộ của một câu lạc bộ sinh viên được, vì hoạt động này không nhằm thu lợi nhuận",
+      d: "Dùng trong video có bật kiếm tiền vẫn được, vì người dùng không bán trực tiếp tài nguyên đó cho ai"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 129,
+    chapter: 4,
+    text: "Một báo cáo đã viết xong nội dung nhưng định dạng lộn xộn. Người viết cần làm bốn việc: (a) đặt cấp đề mục cho các tiêu đề; (b) sinh mục lục; (c) thống nhất phông và cỡ chữ thân bài; (d) rà chính tả. Trình tự nào ít phải làm lại nhất?",
+    options: {
+      a: "(b) rồi (a) rồi (c) rồi (d), vì có mục lục trước thì mới biết cần đặt cấp đề mục cho những tiêu đề nào",
+      b: "(c) rồi (b) rồi (a) rồi (d), vì thống nhất phông chữ trước thì mục lục sinh ra sẽ đúng định dạng ngay",
+      c: "(a) rồi (c) rồi (b) rồi (d), vì có cấp đề mục mới sinh được mục lục, và mục lục sinh sau khi định dạng đã ổn",
+      d: "(a) rồi (b) rồi (c) rồi (d), vì có cấp đề mục là sinh được mục lục ngay, còn thống nhất phông chữ để làm sau"
+    },
+    correctAnswer: "c"
+  },
+
+  // CHƯƠNG 5 (Câu 130 - 167)
+  {
+    id: 130,
+    chapter: 5,
+    text: "Trong ngữ cảnh công cụ dò AI, thuật ngữ \"false positive\" (báo sai dương tính) được định nghĩa như thế nào?",
+    options: {
+      a: "Công cụ từ chối đưa ra kết luận vì văn bản đầu vào quá ngắn để phân tích",
+      b: "Công cụ kết luận sai là 'có vi phạm bất thường' trong khi thực tế không có",
+      c: "Công cụ kết luận là 'không có vi phạm' trong khi thực tế có vi phạm xảy ra",
+      d: "Công cụ đưa ra hai kết luận trái ngược nhau khi phân tích cùng một văn bản"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 131,
+    chapter: 5,
+    text: "Vì sao kẻ lừa đảo hầu như luôn tạo áp lực thời gian (\"khẩn cấp\", \"ngay bây giờ\") với nạn nhân?",
+    options: {
+      a: "Vì các giao dịch chuyển tiền chỉ được ngân hàng xử lý trong một khung giờ ngắn cố định mỗi ngày",
+      b: "Vì đường link giả mạo thường bị các trình duyệt phát hiện và chặn sau một khoảng thời gian ngắn",
+      c: "Vì hệ thống theo dõi của cơ quan chức năng cần vài giờ mới định vị được nguồn phát cuộc gọi lừa đảo",
+      d: "Vì sự gấp gáp đẩy não sang chế độ phản ứng theo bản năng, làm giảm khả năng tư duy phản biện"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 132,
+    chapter: 5,
+    text: "Một kế toán nhận cuộc gọi có giọng nói giống hệt giám đốc, yêu cầu chuyển khoản gấp cho một đối tác mới và dặn giữ kín. Giọng, cách xưng hô, cả tiếng ồn nền đều rất thật. Kế toán nên xác minh thế nào trước khi làm theo?",
+    options: {
+      a: "Nghe kỹ giọng xem có ngắt nghỉ bất thường không, vì giọng do AI tạo thường để lộ dấu vết ở những chỗ chuyển câu hoặc lấy hơi",
+      b: "Đề nghị chuyển sang gọi video để nhìn mặt, vì hình ảnh video khó giả hơn nhiều so với giọng nói",
+      c: "Yêu cầu người gọi gửi email xác nhận từ địa chỉ công ty, vì email công ty khó giả hơn giọng nói",
+      d: "Hỏi một chi tiết riêng chỉ giám đốc thật biết, rồi gác máy và gọi lại theo số đã lưu trước khi làm gì tiếp"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 133,
+    chapter: 5,
+    text: "Nghe tin nhiều dịch vụ trực tuyến bị rò rỉ dữ liệu, một sinh viên muốn kiểm chứng xem địa chỉ email của mình có từng xuất hiện trong các vụ rò rỉ công khai hay không. Cách kiểm chứng đúng là gì?",
+    options: {
+      a: "Cài thêm phần mềm diệt virus mới, vì dữ liệu bị rò rỉ bắt nguồn từ virus nằm trong máy của mình",
+      b: "Tra email trên một dịch vụ tra cứu rò rỉ dữ liệu uy tín rồi đổi mật khẩu các tài khoản liên quan",
+      c: "Bỏ địa chỉ email đang dùng và lập địa chỉ mới, vì email đã lộ thì các tài khoản gắn với nó khó giữ",
+      d: "Đăng nhập thử từng tài khoản; nếu vẫn vào được bình thường nghĩa là dữ liệu của mình chưa bị lộ"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 134,
+    chapter: 5,
+    text: "Ba nhân viên dán tài liệu nội bộ vào chatbot: An dùng tài khoản doanh nghiệp có cam kết không lưu dữ liệu quá 30 ngày; Bình dùng bản miễn phí và đã tắt tuỳ chọn \"dùng dữ liệu để huấn luyện\"; Chi dùng bản miễn phí, để nguyên cài đặt mặc định. Sau đó máy chủ lưu lịch sử trò chuyện của bản miễn phí bị xâm nhập; dữ liệu của cả Bình và Chi đều bị lộ. Vì sao dữ liệu của Bình cũng bị lộ?",
+    options: {
+      a: "Tắt huấn luyện không đồng nghĩa với không lưu trữ; nội dung Bình dán vẫn nằm trên máy chủ, nên lộ khi máy chủ bị xâm nhập",
+      b: "Bình đã tắt nhầm một tuỳ chọn khác, vì nếu tắt đúng tuỳ chọn huấn luyện thì dữ liệu sẽ không bao giờ bị lưu lại trên máy chủ",
+      c: "Mọi dữ liệu nhập vào chatbot đều được công bố công khai trên mạng, nên việc dữ liệu của Bình bị lộ là điều không thể tránh khỏi",
+      d: "Tuỳ chọn tắt huấn luyện chỉ có hiệu lực sau 30 ngày, nên những gì Bình dán trong tháng đầu vẫn được dùng để huấn luyện mô hình"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 135,
+    chapter: 5,
+    text: "Trong trình quản lý mật khẩu, \"mật khẩu chính\" (master password) là gì?",
+    options: {
+      a: "Mật khẩu mạnh nhất trong số các mật khẩu được lưu ở kho",
+      b: "Mật khẩu dùng chung cho nhiều website quan trọng của người dùng",
+      c: "Mật khẩu do hệ thống sinh ngẫu nhiên và gửi qua email cho người dùng",
+      d: "Mật khẩu duy nhất người dùng phải tự nhớ để mở kho mật khẩu"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 136,
+    chapter: 5,
+    text: "Ba sinh viên làm cùng một bài tập phân tích. An tự suy nghĩ khoảng 10 phút, sau đó hỏi AI để so sánh, rồi tự viết lại lập luận bằng lời của mình. Bình hỏi AI ngay khi nhận đề, chép câu trả lời và chỉ sửa vài từ cho khác đi; bài được điểm cao. Chi không dùng AI, mất gấp đôi thời gian và bài chưa đầy đủ bằng hai bạn. Nhận định nào đánh giá đúng ba cách làm?",
+    options: {
+      a: "Cả ba cách đều như nhau về mặt học tập, vì cuối cùng cả ba bạn đều nộp bài đúng hạn và mỗi bạn đều tự chịu trách nhiệm về bài của mình",
+      b: "Cách của An đúng tinh thần dùng AI có kiểm soát; Bình tích nợ nhận thức dù điểm cao; Chi không sai nhưng chưa tận dụng AI để hỗ trợ",
+      c: "Cách của Bình hợp lý nhất vì đạt điểm cao trong thời gian ngắn, còn việc sửa vài từ cho thấy bạn ấy đã đọc và xử lý câu trả lời của AI",
+      d: "Cách của Chi tốt nhất vì tránh hoàn toàn AI, nên không tích nợ nhận thức; cách của An và Bình ngang nhau vì cả hai đều có hỏi AI khi làm bài"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 137,
+    chapter: 5,
+    text: "Lần đầu chạy công cụ Kiểm tra bảo mật của Bitwarden, một sinh viên nhận về 25 cảnh báo mật khẩu yếu và trùng lặp. Cách xử lý hợp lý là gì?",
+    options: {
+      a: "Ưu tiên đổi trước mật khẩu của các tài khoản quan trọng nhất như email và ngân hàng",
+      b: "Gỡ trình quản lý mật khẩu và quay lại cách tự ghi nhớ để không còn nhận cảnh báo nữa",
+      c: "Bỏ qua báo cáo vì lần quét đầu tiên thường hiển thị hàng loạt cảnh báo kém tin cậy",
+      d: "Đổi lần lượt bắt đầu từ những tài khoản ít sử dụng nhất vì chúng thường bị bỏ quên lâu"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 138,
+    chapter: 5,
+    text: "Một tiện ích trình duyệt hứa tóm tắt trang web đang mở, và xin quyền \"đọc và thay đổi dữ liệu trên mọi trang web bạn truy cập\". Vì sao đây là mức quyền cần cân nhắc rất kỹ?",
+    options: {
+      a: "Quyền này khiến tiện ích không hoạt động được mỗi khi người dùng bật chế độ duyệt ẩn danh của trình duyệt",
+      b: "Quyền này làm trình duyệt chạy chậm hơn vì tiện ích phải xử lý nội dung của tất cả các trang được mở",
+      c: "Quyền này bao cả trang có dữ liệu nhạy cảm như ngân hàng, thư điện tử, vượt xa việc tóm tắt một trang đang mở",
+      d: "Quyền này yêu cầu người dùng đăng nhập tài khoản mới dùng được, nên phải tạo thêm một tài khoản nữa"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 139,
+    chapter: 5,
+    text: "Từ bài học vụ Samsung (2023), hành vi nào sau đây lặp lại đúng loại rủi ro đã khiến công ty này cấm nhân viên dùng ChatGPT?",
+    options: {
+      a: "Nhờ chatbot AI công khai gợi ý dàn ý cho một bài thuyết trình về chủ đề đã đăng tải rộng rãi trên báo",
+      b: "Dán nguyên văn hợp đồng chưa công bố của công ty vào một chatbot AI công khai để nhờ tóm tắt nhanh",
+      c: "Dùng chatbot AI công khai để tra cứu định nghĩa một thuật ngữ chuyên ngành có sẵn trong giáo trình",
+      d: "Yêu cầu chatbot AI công khai giải thích cách hoạt động của một thuật toán sắp xếp trong tin học cơ sở"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 140,
+    chapter: 5,
+    text: "Passkey là công nghệ xác thực có đặc điểm nào sau đây?",
+    options: {
+      a: "Dùng mã dự phòng để khôi phục tài khoản khi mất điện thoại cài ứng dụng xác thực",
+      b: "Dùng khoá mã hoá lưu trên thiết bị kết hợp sinh trắc học, không cần mật khẩu",
+      c: "Dùng chuỗi ký tự dài do trình quản lý mật khẩu tạo ngẫu nhiên cho từng trang",
+      d: "Dùng mã một lần gồm sáu chữ số do ứng dụng xác thực sinh ra theo chu kỳ"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 141,
+    chapter: 5,
+    text: "Một người dùng máy tính Windows, laptop MacBook và điện thoại Android, thường xuyên chuyển giữa nhiều trình duyệt khác nhau. Phương án quản lý mật khẩu phù hợp là gì?",
+    options: {
+      a: "Bitwarden, vì hoạt động trên nhiều hệ điều hành và trình duyệt khác hãng nhau",
+      b: "Google Password Manager, vì tự điền tốt trên các trình duyệt ngoài hệ sinh thái Chrome",
+      c: "Trình quản lý có sẵn của từng trình duyệt, mỗi trình duyệt duy trì một kho mật khẩu riêng",
+      d: "iCloud Keychain, vì đây là giải pháp được tích hợp sâu cho đủ mọi loại thiết bị"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 142,
+    chapter: 5,
+    text: "Vì sao với mật khẩu, tiêu chí \"khác nhau cho từng tài khoản\" lại quan trọng hơn tiêu chí \"phức tạp\"?",
+    options: {
+      a: "Vì mật khẩu phức tạp buộc người dùng phải ghi ra giấy, và tờ giấy đó mới là thứ dễ bị kẻ gian tiếp cận và lợi dụng nhất",
+      b: "Vì các website hiện nay đều giới hạn độ dài mật khẩu, nên có cố đặt phức tạp hơn cũng không tăng thêm được độ an toàn",
+      c: "Vì mật khẩu phức tạp khó gõ chính xác trên điện thoại, khiến người dùng dễ bị khoá tài khoản sau nhiều lần nhập sai liên tiếp",
+      d: "Vì kẻ tấn công thường đem mật khẩu đã rò rỉ đi thử hàng loạt nơi khác, nên một mật khẩu dùng chung dù mạnh vẫn sập dây chuyền"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 143,
+    chapter: 5,
+    text: "Một sinh viên để thư mục đồ án trên laptop, đồng thời bật đồng bộ thư mục này lên cả Google Drive và OneDrive, rồi kết luận: \"Đồ án có ba bản ở ba nơi nên đã đạt nguyên tắc 3-2-1.\" Nhận định nào đánh giá đúng kết luận này?",
+    options: {
+      a: "Đạt nếu sinh viên đăng nhập hai dịch vụ đám mây bằng hai tài khoản khác nhau, vì như vậy hai bản đồng bộ sẽ hoàn toàn độc lập với nhau",
+      b: "Đạt: có ba bản dữ liệu, nằm ở hai dịch vụ khác nhau của hai công ty khác nhau, và có hai bản ở bên ngoài máy tính nên đủ yêu cầu off-site",
+      c: "Chưa đạt: hai bản đám mây là bản đồng bộ, nhân bản cả thao tác xoá hay tệp bị mã hoá; cần ít nhất một bản sao lưu đúng nghĩa, tách rời",
+      d: "Chưa đạt chỉ vì thiếu ổ cứng ngoài; nếu chép thêm một bản lên USB mang theo cùng laptop thì thiết lập này sẽ đáp ứng đủ nguyên tắc 3-2-1"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 144,
+    chapter: 5,
+    text: "Một email tự xưng từ Phòng Đào tạo được viết rất trau chuốt, đúng văn phong hành chính, không có lỗi chính tả nào, yêu cầu xác nhận học phí qua link. Cách xử lý phù hợp là gì?",
+    options: {
+      a: "Kết luận email là thật vì văn phong hành chính chuẩn mực và không mắc lỗi chính tả nào",
+      b: "Kết luận email là thật vì thư lừa đảo thường viết sai ngữ pháp và trình bày rất cẩu thả",
+      c: "Nhập thử vài thông tin không quan trọng vào link để quan sát phản ứng của trang web",
+      d: "So từng ký tự địa chỉ email người gửi với tên miền chính thức của trường trước khi tin"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 145,
+    chapter: 5,
+    text: "Vì lý do nào Samsung cấm nhân viên dùng ChatGPT (Hàn Quốc, 3-5/2023)?",
+    options: {
+      a: "Bộ phận an ninh phát hiện ChatGPT cài đặt mã độc tống tiền vào hệ thống máy chủ nội bộ của công ty",
+      b: "Cơ quan quản lý Hàn Quốc ban hành lệnh cấm các doanh nghiệp trong nước sử dụng chatbot AI khi làm việc",
+      c: "ChatGPT tự động đăng tải công khai một số tài liệu nội bộ quan trọng của công ty lên mạng xã hội",
+      d: "Xảy ra 3 vụ rò rỉ dữ liệu trong 20 ngày do nhân viên dán mã nguồn nội bộ và biên bản họp mật vào ChatGPT"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 146,
+    chapter: 5,
+    text: "Một nghiên cứu cho thấy người càng tin vào công cụ AI thì càng ít thực hiện các bước kiểm chứng. Cách dùng kết luận này cho việc học nào là hợp lý nhất?",
+    options: {
+      a: "Đưa bước kiểm chứng thành việc bắt buộc trong quy trình làm bài để không phụ thuộc mức tin của từng người",
+      b: "Hạn chế số lần sinh viên được dùng công cụ AI trong mỗi bài, vì dùng ít thì mức tin sẽ không tăng lên cao",
+      c: "Không rút ra được gì cho việc học, vì mức tin là yếu tố tâm lý cá nhân nên nhà trường không can thiệp được",
+      d: "Yêu cầu sinh viên giảm mức tin vào công cụ AI, vì tin ít thì tự nhiên sẽ kiểm chứng nhiều hơn khi làm bài"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 147,
+    chapter: 5,
+    text: "Về hiệu quả của xác thực đa yếu tố (MFA), con số 99,22% rút ra từ nghiên cứu trên dữ liệu hàng triệu tài khoản Microsoft Azure AD khác gì với con số 99,9% thường gặp?",
+    options: {
+      a: "99,22% là mức bảo vệ tối thiểu được cam kết sẵn, còn 99,9% là mức chỉ đạt được khi trả phí",
+      b: "Hai con số đo hai loại tấn công khác nhau nên không thể đặt cạnh nhau để so sánh",
+      c: "99,22% là kết quả đo lường học thuật trên dữ liệu thực, còn 99,9% là khẩu hiệu quảng cáo",
+      d: "99,22% chỉ đúng cho tài khoản doanh nghiệp, còn 99,9% đúng cho tài khoản cá nhân"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 148,
+    chapter: 5,
+    text: "Một kế toán được mời vào cuộc họp video gấp với \"giám đốc tài chính\" và ba \"đồng nghiệp\", được yêu cầu chuyển một khoản tiền lớn trong hôm nay và giữ kín. Các thông tin có được: (1) giọng nói và hình ảnh rất giống người thật; (2) có nhiều người quen cùng tham dự; (3) lời mời họp gửi từ một tài khoản nhắn tin lạ; (4) yêu cầu vừa gấp vừa phải giữ kín. Nhận định nào cân đúng sức nặng của các thông tin này?",
+    options: {
+      a: "(1) và (2) có sức nặng nhất, vì khó có thể làm giả cùng lúc giọng nói, hình ảnh của nhiều người quen trong một cuộc họp trực tuyến",
+      b: "(3) và (4) là dấu hiệu quyết định cần dừng lại xác minh; (1) và (2) không chứng minh được gì vì có thể dựng giả cả một cuộc họp",
+      c: "Bốn thông tin có sức nặng như nhau, nên kế toán cần đếm số dấu hiệu khả nghi và chỉ dừng lại khi có từ ba dấu hiệu trở lên cùng lúc",
+      d: "Chỉ (4) đáng lưu ý, vì tài khoản nhắn tin lạ là chuyện bình thường khi lãnh đạo đi công tác và phải dùng thiết bị khác để liên lạc"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 149,
+    chapter: 5,
+    text: "Một người dùng bị chiếm tài khoản dù đã bật xác thực hai bước bằng ứng dụng phê duyệt trên điện thoại. Tìm hiểu lại thấy: mật khẩu tài khoản này trùng với mật khẩu ở một diễn đàn đã bị rò rỉ dữ liệu; lúc 2 giờ sáng, điện thoại hiện liên tục 15 yêu cầu \"phê duyệt đăng nhập\" và người dùng đã bấm \"Đồng ý\" để thông báo dừng lại. Chuỗi nguyên nhân nào giải thích đúng sự việc?",
+    options: {
+      a: "Ứng dụng phê duyệt có lỗ hổng bảo mật, nên kẻ gian vượt được bước thứ hai mà không cần biết mật khẩu của tài khoản người dùng",
+      b: "Xác thực bằng ứng dụng kém an toàn hơn mã qua tin nhắn, nên người dùng cần đổi sang nhận mã qua tin nhắn để tránh lặp lại sự việc",
+      c: "Kẻ gian đã bẻ khoá được mật khẩu mạnh của tài khoản bằng máy tính cấu hình cao, rồi gửi yêu cầu phê duyệt cho đến khi được chấp nhận",
+      d: "Mật khẩu dùng chung bị lộ giúp kẻ gian qua bước thứ nhất, rồi người dùng tự phê duyệt một yêu cầu không phải do mình tạo ra"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 150,
+    chapter: 5,
+    text: "Trong an toàn thông tin khi sử dụng công cụ AI, \"Shadow AI\" được định nghĩa là gì?",
+    options: {
+      a: "Việc tổ chức triển khai công cụ AI nội bộ nhưng không công bố tính năng cho toàn thể nhân viên",
+      b: "Việc kẻ gian dựng một chatbot giả mạo thương hiệu quen thuộc nhằm thu thập dữ liệu người dùng",
+      c: "Việc công cụ AI âm thầm lưu lại lịch sử hội thoại để huấn luyện cho phiên bản mô hình kế tiếp",
+      d: "Việc nhân viên hoặc sinh viên dùng công cụ AI mà tổ chức không biết và không phê duyệt"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 151,
+    chapter: 5,
+    text: "Ba người bật xác thực hai bước và lưu mã dự phòng (backup codes) theo ba cách. An chụp màn hình để trong album ảnh, album tự đồng bộ lên đám mây. Bình lưu mã dự phòng của tài khoản trình quản lý mật khẩu ngay trong kho của chính trình quản lý đó. Chi in mã ra giấy, cất trong ngăn tủ ở nhà, tách khỏi điện thoại và máy tính. Nhận định nào đánh giá đúng ba cách lưu?",
+    options: {
+      a: "Cách của Bình tốt nhất vì kho mật khẩu được mã hoá; cách của Chi kém nhất vì giấy dễ thất lạc, còn cách của An tiện lợi vì có sẵn trên đám mây",
+      b: "Cả ba cách đều đạt yêu cầu, vì điều quan trọng là đã bật xác thực hai bước; còn nơi lưu mã dự phòng chỉ là thói quen cá nhân của từng người",
+      c: "Cách của Chi tốt nhất; cách của An ở mức kém vì ai vào được album là có mã; cách của Bình vô dụng khi chính kho bị khoá hoặc mất quyền vào",
+      d: "Cách của An tốt nhất vì mã được sao lưu tự động lên đám mây; cách của Bình và Chi ngang nhau vì đều cất ở một nơi chỉ chủ tài khoản biết"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 152,
+    chapter: 5,
+    text: "Phòng nhân sự cần một công cụ AI để tóm tắt 200 hồ sơ ứng viên có họ tên, số điện thoại và ngày sinh. Có ba lựa chọn: (X) miễn phí, tóm tắt nhanh nhất, nhưng chính sách ghi dữ liệu có thể được dùng để huấn luyện mô hình và không cho tắt; (Y) nằm trong bộ phần mềm công ty đã ký hợp đồng, cam kết không dùng dữ liệu để huấn luyện, nhưng tóm tắt chậm hơn; (Z) trả phí, tóm tắt tốt, cho tắt huấn luyện, nhưng chưa có trong danh mục công cụ công ty cho phép. Nhận định nào đúng nguyên tắc nhất?",
+    options: {
+      a: "Chọn Y, nhưng chỉ sau khi chạy thử cả ba công cụ trên chính 200 hồ sơ này để so sánh chất lượng tóm tắt",
+      b: "Chọn Y: X bị loại vì dữ liệu ứng viên có thể bị đem huấn luyện, Z chưa được phê duyệt; tốc độ xét sau",
+      c: "Chọn Z: công cụ đã cho tắt huấn luyện và tóm tắt tốt, nên chưa có trong danh mục chỉ là thủ tục hành chính",
+      d: "Chọn X: hồ sơ ứng viên chỉ dùng nội bộ một lần, nên tốc độ và chi phí là hai tiêu chí cần đặt lên trước tiên"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 153,
+    chapter: 5,
+    text: "Máy tính của một người dùng bị ransomware mã hoá toàn bộ dữ liệu kèm thông báo đòi tiền chuộc. Người này đã duy trì sao lưu theo nguyên tắc 3-2-1 từ trước với bản off-site trên cloud còn nguyên vẹn. Cách xử lý phù hợp là gì?",
+    options: {
+      a: "Cắm ngay USB sao lưu vào chiếc máy đang nhiễm để chép đè dữ liệu sạch lên phần đã bị mã hoá",
+      b: "Không trả tiền chuộc; làm sạch máy rồi khôi phục dữ liệu từ bản sao lưu off-site còn nguyên vẹn",
+      c: "Trả tiền chuộc sớm, vì kẻ tấn công thường giữ đúng cam kết trả lại dữ liệu sau khi nhận đủ tiền",
+      d: "Định dạng lại ổ cứng rồi chờ thêm ít lâu, vì ransomware thường tự giải mã dữ liệu khi hết thời hạn"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 154,
+    chapter: 5,
+    text: "Kẻ gian xem trang mạng xã hội nghề nghiệp để biết tên, chức danh một nhân viên. Sau đó hắn gọi bộ phận hỗ trợ kỹ thuật, xưng là nhân viên đó, nói vừa mất điện thoại và nhờ cấp lại xác thực đa yếu tố. Bộ phận hỗ trợ hỏi ngày sinh và mã nhân viên hai thông tin hắn đã tra được trên mạng – rồi cấp lại. Nguyên nhân gốc khiến vụ chiếm tài khoản thành công là gì?",
+    options: {
+      a: "Nhân viên công khai tên và chức danh trên mạng xã hội nghề nghiệp, nên kẻ gian biết được phải giả làm ai khi gọi điện",
+      b: "Quy trình xác minh dựa vào thông tin tra được trên mạng, không xác minh qua một kênh độc lập với cuộc gọi đang yêu cầu",
+      c: "Mật khẩu của nhân viên quá yếu, nên kẻ gian chỉ cần thêm lớp xác thực đa yếu tố là chiếm được tài khoản một cách dễ dàng",
+      d: "Xác thực đa yếu tố không có tác dụng với tấn công qua điện thoại, nên công ty cần thay bằng một phương thức đăng nhập khác"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 155,
+    chapter: 5,
+    text: "Có ba người dùng: A chỉ dùng thiết bị của một hãng; B dùng máy tính một hãng và điện thoại hãng khác; C dùng máy tính công ty không được cài thêm phần mềm. Cách chọn loại trình quản lý mật khẩu nào hợp lý cho từng người?",
+    options: {
+      a: "Cả ba dùng loại độc lập đa nền tảng, vì loại này chạy được ở nhiều nơi nên áp dụng chung là đơn giản nhất",
+      b: "Cả ba dùng loại tích hợp theo hệ sinh thái, vì loại này không phải cài thêm và mở khoá bằng sinh trắc học",
+      c: "A dùng loại độc lập cho linh hoạt; B dùng loại tích hợp cho gọn; C dùng loại cài trên máy cá nhân rồi chép sang",
+      d: "A dùng loại tích hợp của hệ sinh thái; B dùng loại độc lập đa nền tảng; C dùng loại có sẵn trong trình duyệt"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 156,
+    chapter: 5,
+    text: "Một sinh viên nhận email tự xưng từ Ngân hàng ABC thông báo trúng thưởng, kèm link đăng nhập để nhận quà. Trước khi thao tác bất kỳ điều gì, bước kiểm tra phù hợp là gì?",
+    options: {
+      a: "Tự mở trình duyệt, gõ trực tiếp địa chỉ website chính thức của ngân hàng để kiểm tra thông báo",
+      b: "Trả lời email đề nghị người gửi cung cấp thêm giấy tờ chứng minh chương trình trúng thưởng",
+      c: "Bấm vào link trong email nhưng chỉ xem giao diện, không nhập thông tin đăng nhập vào trang đó",
+      d: "Chuyển tiếp email cho vài người bạn cùng lớp để mọi người xem giúp và đoán thật hay giả"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 157,
+    chapter: 5,
+    text: "Còn hai ngày nữa đến hạn nộp tiểu luận, một sinh viên muốn dùng AI hỗ trợ mà không vi phạm liêm chính học thuật. Cách làm được chấp nhận theo quy định phổ biến ở các trường đại học giai đoạn 2024-2026 là gì?",
+    options: {
+      a: "Mượn bài của một sinh viên khoá trước rồi nhờ AI diễn đạt lại, vì nội dung gốc vốn dĩ do con người viết ra",
+      b: "Để AI viết trọn bài nhưng chủ động nộp muộn một ngày, chấp nhận bị trừ điểm để bài nộp trông giống tự viết hơn",
+      c: "Để AI viết trọn bài rồi tự sửa vài lỗi chính tả và thay một số từ ngữ cho giống với văn phong thường ngày",
+      d: "Dùng AI gợi ý ý tưởng và dàn ý ban đầu, tự viết toàn bộ bằng lập luận của mình, khai báo rõ bước đã dùng AI"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 158,
+    chapter: 5,
+    text: "Một người nhận được thư yêu cầu cập nhật thông tin tài khoản và cân nhắc bốn việc: (a) bấm liên kết xem trang có đúng giao diện không; (b) xem tên miền thật của người gửi; (c) gọi tới số tổng đài đã lưu để hỏi; (d) trả lời thư để hỏi lại người gửi. Trình tự xử lý đúng là gì?",
+    options: {
+      a: "(b) rồi (c), không làm (a) và (d), vì cả hai việc đó đều diễn ra trên kênh có thể đang bị kiểm soát",
+      b: "(c) rồi (a) rồi (b), vì gọi hỏi trước rồi vẫn nên xem trang để biết trang giả trông thế nào mà tránh về sau",
+      c: "(d) rồi (b) rồi (c), vì hỏi lại người gửi là nhanh nhất, nếu không có phản hồi thì mới kiểm tên miền",
+      d: "(a) rồi (b) rồi (c), vì xem trang trước cho biết ngay thư thật hay giả, sau đó mới kiểm tên miền và gọi hỏi"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 159,
+    chapter: 5,
+    text: "Dưới đây là bốn bản khai báo sử dụng AI cho cùng một tiểu luận. Bản nào giúp người chấm xác định được phần nào AI đã làm và phần nào người viết chịu trách nhiệm?",
+    options: {
+      a: "Nêu công cụ đã dùng, các mục có dùng, việc AI làm ở từng mục, và những gì người viết đã kiểm chứng lại",
+      b: "Nêu công cụ đã dùng, việc AI làm, các câu lệnh đã nhập, và cam kết tự chịu trách nhiệm về nội dung",
+      c: "Nêu công cụ đã dùng, các mục có dùng, việc AI làm ở từng mục, và cam kết đã đọc lại toàn bài một lượt",
+      d: "Nêu công cụ đã dùng, các mục có dùng, số lượt hỏi AI ở từng mục, và tổng thời gian đã dùng công cụ"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 160,
+    chapter: 5,
+    text: "Một nhóm thực tập định dán danh sách khách hàng (họ tên, số điện thoại, lịch sử mua hàng) vào một chatbot miễn phí để nhờ phân nhóm khách hàng. Theo Luật Bảo vệ dữ liệu cá nhân 2025, việc cần làm trước tiên là gì?",
+    options: {
+      a: "Xoá lịch sử hội thoại ngay sau khi phân nhóm xong, để dữ liệu khách hàng không còn lưu lại trên tài khoản của nhóm",
+      b: "Chọn chatbot có máy chủ đặt tại Việt Nam, vì khi dữ liệu không ra nước ngoài thì nhóm không phát sinh nghĩa vụ bảo vệ dữ liệu",
+      c: "Xin phép trưởng nhóm thực tập trước khi dán, vì người phụ trách dự án có quyền quyết định cách sử dụng dữ liệu khách hàng",
+      d: "Kiểm tra khách hàng đã đồng ý cho dùng dữ liệu vào việc này chưa, và xoá hoặc ẩn thông tin định danh trước khi đưa vào công cụ"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 161,
+    chapter: 5,
+    text: "Một bài nộp có số liệu sai do công cụ AI cung cấp. Sinh viên lập luận: \"em đã khai báo dùng AI nên phần sai là của công cụ\". Vì sao lập luận này không được chấp nhận?",
+    options: {
+      a: "Sinh viên phải khai báo trước khi làm bài chứ không phải khi nộp bài, nên bản khai báo nộp cùng bài không hợp lệ",
+      b: "Khai báo làm rõ nguồn gốc nhưng không chuyển trách nhiệm; người đứng tên bài vẫn chịu trách nhiệm về nội dung đã nộp",
+      c: "Sinh viên chưa nêu tên phiên bản cụ thể của công cụ trong bản khai báo, nên bản khai báo chưa có hiệu lực",
+      d: "Công cụ AI không phải chủ thể pháp lý nên không ai phải chịu trách nhiệm, bài chỉ bị trừ điểm phần số liệu"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 162,
+    chapter: 5,
+    text: "Một người gửi yêu cầu xoá dữ liệu cá nhân tới một nền tảng và bị từ chối với lý do \"dữ liệu cần cho mục đích vận hành\". Bước tiếp theo đúng là gì?",
+    options: {
+      a: "Gửi lại đúng yêu cầu cũ nhiều lần, vì nền tảng sẽ phải xử lý khi số lần yêu cầu vượt một ngưỡng nhất định",
+      b: "Xoá tài khoản ngay lập tức, vì xoá tài khoản là cách buộc nền tảng phải xoá toàn bộ dữ liệu liên quan",
+      c: "Yêu cầu nền tảng nêu rõ dữ liệu nào cần giữ và vì sao, vì bên xử lý dữ liệu phải giải trình được cơ sở giữ lại",
+      d: "Chấp nhận câu trả lời, vì mục đích vận hành là lý do hợp lệ nên nền tảng không có nghĩa vụ giải thích thêm"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 163,
+    chapter: 5,
+    text: "Một sinh viên hoàn thành tiểu luận có sử dụng AI hỗ trợ và cần viết bản khai báo sử dụng AI đính kèm bài nộp. Bản khai báo đúng chuẩn cần nêu những nội dung gì?",
+    options: {
+      a: "Danh sách các công cụ AI thông dụng trên thị trường kèm nhận xét ưu nhược điểm của từng công cụ đó",
+      b: "Một dòng ghi chung chung 'bài viết có tham khảo AI' đặt ở cuối bài để bản khai báo không trở nên dài dòng quá mức",
+      c: "Tên cụ thể các công cụ AI đã dùng, phần nào của bài được hỗ trợ, mức hỗ trợ và cách đã kiểm chứng lại nội dung",
+      d: "Lời cam đoan phần do AI hỗ trợ có chất lượng cao hơn phần tự viết, kèm đề nghị được cộng điểm sáng tạo"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 164,
+    chapter: 5,
+    text: "Vì sao các vị trí xử lý tài chính, kế toán, nhân sự thường là mục tiêu hàng đầu của các vụ giả mạo lãnh đạo bằng deepfake?",
+    options: {
+      a: "Vì các vị trí này có quyền thực hiện giao dịch hoặc truy cập thông tin nhạy cảm mà kẻ gian nhắm tới",
+      b: "Vì các vị trí này làm việc theo ca kíp nên dễ bị gọi vào thời điểm không có đồng nghiệp hỗ trợ",
+      c: "Vì thông tin liên hệ của các vị trí này bắt buộc phải công khai trên website chính thức của tổ chức",
+      d: "Vì nhân sự ở các vị trí này thường ít được đào tạo về công nghệ hơn các bộ phận khác trong tổ chức"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 165,
+    chapter: 5,
+    text: "Sau khi học về vụ lừa đảo deepfake tại Arup, một sinh viên nói: \"Em đã hiểu rõ deepfake hoạt động thế nào, nên nếu gặp tình huống như vậy em chắc chắn sẽ nhận ra và không bị lừa.\" Nhận định nào đánh giá đúng nhận định này?",
+    options: {
+      a: "Có cơ sở: người đã hiểu cách deepfake được tạo ra sẽ nhận ra các dấu hiệu bất thường trên hình và giọng, nên khó bị lừa trong thực tế",
+      b: "Chưa đủ cơ sở chỉ vì sinh viên chưa đi làm; khi đã có kinh nghiệm làm việc ở vị trí tài chính thì kiến thức đó sẽ đủ để không bị lừa nữa",
+      c: "Chưa đủ cơ sở: hiểu lý thuyết chưa đủ, vì áp lực thời gian làm giảm tư duy phản biện; cần xây sẵn quy tắc hành động từ trước",
+      d: "Có cơ sở nếu sinh viên luyện xem thật nhiều video deepfake mỗi ngày, vì mắt quen với dấu hiệu giả thì sẽ phát hiện được trong mọi tình huống"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 166,
+    chapter: 5,
+    text: "Một doanh nghiệp muốn xây quy định nội bộ để phòng kiểu lừa đảo deepfake giả lãnh đạo yêu cầu chuyển tiền, như vụ nhân viên tài chính của Arup chuyển 25 triệu USD sau một cuộc họp video với các \"lãnh đạo\" giả. Quy định nào phù hợp nhất?",
+    options: {
+      a: "Cho phép lệnh chuyển tiền gắn nhãn khẩn được rút gọn thủ tục để kịp chỉ đạo của lãnh đạo",
+      b: "Yêu cầu người gọi video bật camera độ phân giải cao, vì hình ảnh deepfake sẽ tự lộ ra khi nét",
+      c: "Bắt buộc xác minh qua điện thoại độc lập và có hai người phê duyệt cho giao dịch chuyển tiền lớn",
+      d: "Cấm bộ phận tài chính họp trực tuyến, yêu cầu các lệnh chuyển tiền chỉ trao đổi bằng văn bản giấy"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 167,
+    chapter: 5,
+    text: "Sau khi cài xong tiện ích mở rộng của một trình quản lý mật khẩu (như Bitwarden), một sinh viên đăng ký tài khoản trên một website học trực tuyến và đến ô nhập mật khẩu. Theo nguyên tắc sử dụng trình quản lý mật khẩu, thao tác đúng tại ô này là gì?",
+    options: {
+      a: "Tự nghĩ một mật khẩu ghép từ tên và năm sinh của mình cho dễ nhớ, rồi chép thêm vào kho để lưu lại",
+      b: "Đặt tạm một mật khẩu ngắn để đăng ký cho nhanh, dự định vài hôm nữa quay lại đổi thành mật khẩu mạnh hơn",
+      c: "Yêu cầu trình quản lý mật khẩu tự tạo một mật khẩu ngẫu nhiên mạnh ngay tại ô này rồi lưu vào kho",
+      d: "Nhập lại đúng mật khẩu chính (master password) của kho, vì đây là mật khẩu mạnh nhất mình đang có"
+    },
+    correctAnswer: "c"
+  },
+
+  // CHƯƠNG 6 (Câu 168 - 200)
+  {
+    id: 168,
+    chapter: 6,
+    text: "Một người dùng vừa lắp xong đầy đủ các khối cho agent thu thập giá sản phẩm và chuẩn bị bật (Publish). Thao tác đúng ngay sau khi bật agent là gì?",
+    options: {
+      a: "Tắt khối AI trích xuất trong tuần đầu để giảm rủi ro, sau đó bật lại khi các bước khác đã ổn định hơn",
+      b: "Để agent chạy tự động ngay từ hôm sau, vì việc đã lắp đủ các khối chứng tỏ quy trình sẽ vận hành đúng",
+      c: "Chạy thử một lần thủ công để quan sát kết quả trước khi để agent chạy tự động theo lịch hằng ngày",
+      d: "Nhân đôi agent thành hai bản chạy song song để hai kết quả tự đối chiếu với nhau thay cho con người"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 169,
+    chapter: 6,
+    text: "Một file PDF trong bộ tài liệu báo lỗi định dạng khi tải lên notebook; người dùng phát hiện đây là bản scan từ giấy. Cách xử lý đúng là gì?",
+    options: {
+      a: "In file ra giấy rồi quét lại ở độ phân giải cao hơn, vì bản scan cũ hỏng là do máy quét thiếu điểm ảnh",
+      b: "Chụp màn hình từng trang rồi tải các file ảnh đó lên notebook, vì ảnh chụp mới giữ đúng định dạng gốc",
+      c: "Dùng công cụ OCR, chẳng hạn mở file bằng Google Docs trên Drive, để chuyển ảnh scan thành văn bản",
+      d: "Đổi đuôi file từ PDF sang DOCX bằng cách sửa tên file, vì lỗi này chỉ nằm ở phần mở rộng của tên tệp"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 170,
+    chapter: 6,
+    text: "Một nhóm dựng agent làm ba việc: (1) đọc biên bản họp và tạo bản nháp danh sách việc trong bảng nội bộ của nhóm; (2) tự xoá vĩnh viễn các thẻ việc đã quá hạn 30 ngày, không khôi phục được; (3) tự gửi email nhắc hạn cho đối tác bên ngoài. Nhóm lập luận: \"Agent đã chạy thử đúng 50 trên 50 lần, nên cả ba việc không cần bước người duyệt.\" Nhận định nào đánh giá đúng lập luận này?",
+    options: {
+      a: "Đúng: 50 lần chạy đúng liên tiếp đủ chứng minh agent tin cậy, nên có thể bỏ bước người duyệt ở cả ba việc của nhóm",
+      b: "Chưa đúng: chạy đúng nhiều lần không thay được điểm dừng; việc (2) và (3) cần người duyệt, việc (1) thì không",
+      c: "Chưa đúng: chỉ việc (3) cần người duyệt vì hướng ra bên ngoài, còn việc (1) và (2) chỉ thao tác trên dữ liệu nội bộ",
+      d: "Chưa đúng: cả ba việc đều phải có người duyệt, vì agent nào cũng có thể sai ở bất kỳ bước nào trong quy trình chạy"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 171,
+    chapter: 6,
+    text: "Một phòng khám muốn dựng agent tự phân loại phiếu hẹn của bệnh nhân. Bốn tiêu chí dưới đây, tiêu chí nào phải đạt trước, và nếu không đạt thì loại nền tảng đó bất kể các tiêu chí khác?",
+    options: {
+      a: "Nền tảng đáp ứng chuẩn bảo vệ dữ liệu y tế, vì dữ liệu bệnh nhân thuộc diện được bảo vệ đặc biệt",
+      b: "Nền tảng có chi phí theo lượt chạy thấp, vì số phiếu hẹn mỗi ngày lớn nên chi phí sẽ tăng nhanh theo lượt",
+      c: "Nền tảng có khối AI dựng sẵn, vì phân loại phiếu hẹn cần bước AI và tự viết bước này thì tốn thời gian",
+      d: "Nền tảng có kho tích hợp rộng, vì nối được nhiều ứng dụng thì quy trình phân loại phiếu hẹn mới chạy trơn"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 172,
+    chapter: 6,
+    text: "Một nhóm mô tả agent của mình là \"một prompt dài gửi cho chatbot mỗi sáng\". Vì sao đây chưa phải một agent, và còn thiếu thành phần nào?",
+    options: {
+      a: "Thiếu việc kết hợp nhiều công cụ AI cùng lúc, nên phải dùng từ hai mô hình trở lên thì mới thành agent",
+      b: "Thiếu cơ chế tự kích hoạt và các bước hành động ra ngoài, nên nó chỉ sinh văn bản khi có người gửi yêu cầu",
+      c: "Thiếu độ dài và độ chi tiết của yêu cầu gửi đi, nên phải viết yêu cầu dài hơn thì mới thành một agent",
+      d: "Không thiếu thành phần nào cả, nên việc gửi một yêu cầu định kỳ mỗi sáng đã đủ điều kiện của một agent"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 173,
+    chapter: 6,
+    text: "Đầu ra của AI đúng nội dung nhưng trình bày mỗi lần một kiểu, khiến không ghép được vào báo cáo theo mẫu cố định. Kỹ thuật nào xử lý đúng nguyên nhân này?",
+    options: {
+      a: "Liệt kê những điều mô hình không được làm, vì loại trừ hết cách trình bày sai thì chỉ còn lại cách đúng",
+      b: "Yêu cầu mô hình trình bày từng bước suy luận trước khi kết luận, vì suy luận rõ thì định dạng cũng nhất quán",
+      c: "Chia yêu cầu thành nhiều lượt hỏi nối tiếp nhau, vì mỗi lượt ngắn thì định dạng đầu ra ổn định hơn",
+      d: "Cung cấp một đến hai ví dụ mẫu đã đúng định dạng, vì vấn đề nằm ở hình thức đầu ra chứ không ở lập luận"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 174,
+    chapter: 6,
+    text: "Khi được hỏi về một tiêu chuẩn kỹ thuật ít phổ biến, mô hình trả lời rất tự tin với số hiệu và năm ban hành cụ thể, nhưng tiêu chuẩn đó không tồn tại. Cùng câu hỏi về một tiêu chuẩn phổ biến thì trả lời đúng. Cách giải thích nào phù hợp nhất?",
+    options: {
+      a: "Mô hình bị lỗi dữ liệu huấn luyện ở phần tiêu chuẩn ít phổ biến, nên nhà cung cấp cần bổ sung dữ liệu đó",
+      b: "Câu hỏi chưa nêu rõ lĩnh vực của tiêu chuẩn, nên bổ sung lĩnh vực thì mô hình sẽ trả lời đúng hoặc từ chối",
+      c: "Mô hình được thiết kế ưu tiên luôn có câu trả lời, nên nó chọn trả lời sai thay vì nói rằng mình không biết",
+      d: "Mô hình sinh chuỗi theo khuôn mẫu đã học, nên ở vùng thưa dữ liệu vẫn sinh ra chuỗi đúng dạng mà không có căn cứ"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 175,
+    chapter: 6,
+    text: "Trong thư viện prompt cá nhân (gồm bài toán – prompt nguyên văn – kết quả – bằng chứng kiểm chứng), vì sao dòng ghi nhận lần người học \"bắt được AI trả lời sai\" được đánh giá là dòng có giá trị nhất?",
+    options: {
+      a: "Vì nó cho phép người học yêu cầu nhà cung cấp công cụ AI hoàn lại chi phí cho câu trả lời sai",
+      b: "Vì nó chứng minh công cụ AI đang dùng kém chất lượng và cần được thay bằng công cụ khác ngay",
+      c: "Vì nó là bằng chứng người học đã dùng AI kèm kiểm chứng thực sự, đúng chuẩn đầu ra của học phần",
+      d: "Vì nó giúp thư viện prompt trông dày dặn, đầy đủ hơn khi nộp bài mà không cần chạy thêm prompt mới"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 176,
+    chapter: 6,
+    text: "Hai nhóm chọn nền tảng dựng agent. Nhóm A cần chạy được trong một tuần, không có người quản trị hệ thống. Nhóm B xử lý dữ liệu nhân sự và có bộ phận kỹ thuật riêng. Cách chọn nào đúng với ràng buộc của từng nhóm?",
+    options: {
+      a: "Cả hai nhóm chọn nền tảng tự vận hành, vì tự vận hành cho mức kiểm soát dữ liệu cao hơn trong cả hai tình huống",
+      b: "Nhóm A chọn dịch vụ sẵn vì dựng nhanh, không cần quản trị; nhóm B chọn tự vận hành để giữ dữ liệu nhân sự trong nội bộ",
+      c: "Cả hai nhóm chọn nền tảng dịch vụ sẵn, vì dựng nhanh là ưu thế quyết định và dữ liệu nào cũng được nhà cung cấp bảo vệ",
+      d: "Nhóm A chọn nền tảng tự vận hành để chủ động về lâu dài; nhóm B chọn dịch vụ sẵn vì đã có bộ phận kỹ thuật xử lý được sự cố"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 177,
+    chapter: 6,
+    text: "Một agent gửi thư nhắc làm khảo sát đã chạy ổn ba tuần. Tuần này nhóm phát hiện nó gửi 140 thư nhắc trong một giờ tới cùng một nhóm người, do một bản ghi trùng lặp gây vòng lặp. Nhóm định sửa bản ghi trùng rồi cho agent chạy tiếp như cũ. Điểm thiếu căn bản trong cách xử lý này là gì?",
+    options: {
+      a: "Chưa xoá dữ liệu khảo sát để nhập lại từ đầu, vì nhiều khả năng còn những bản ghi trùng khác chưa phát hiện",
+      b: "Mới sửa nguyên nhân lần này, chưa thêm nhật ký và ngưỡng bất thường để agent tự dừng, báo khi vượt mức",
+      c: "Chưa gửi thư xin lỗi riêng tới từng người nhận, vì 140 thư nhắc dồn dập đã làm ảnh hưởng uy tín của nhóm",
+      d: "Chưa chuyển sang nền tảng agent khác, vì nền tảng hiện tại đã cho thấy không xử lý được dữ liệu trùng lặp"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 178,
+    chapter: 6,
+    text: "Người dùng chạy phép thử với một công cụ tổng hợp tài liệu có cơ chế grounding: hỏi một câu hoàn toàn không có trong 4 nguồn đã nạp và công cụ trả lời trôi chảy, quả quyết, không kèm cảnh báo nào. Xét theo thang nhận diện chất lượng tốt – trung bình – kém của loại công cụ này, hiện tượng đó nói lên điều gì?",
+    options: {
+      a: "Đây là dấu hiệu cấu hình sai: hiện tượng này chỉ xảy ra khi người dùng quên bật chế độ trích dẫn trong phần cài đặt, bật lại là công cụ sẽ từ chối các câu hỏi ngoài nguồn",
+      b: "Đây là dấu hiệu trung tính: phép thử câu ngoài phạm vi chỉ dùng để đo tốc độ phản hồi của công cụ, còn chất lượng nội dung phải đánh giá bằng các phép thử riêng khác",
+      c: "Đây là dấu hiệu xếp loại kém: công cụ trung thực phải trả lời không có trong nguồn, còn trả lời quả quyết điều không có trong nguồn đã nạp là biểu hiện ảo giác",
+      d: "Đây là dấu hiệu xếp loại tốt: khả năng trả lời vượt ra ngoài phạm vi nguồn đã nạp chứng tỏ công cụ sở hữu kiến thức nền rộng và đủ sức thay thế việc đọc bản gốc"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 179,
+    chapter: 6,
+    text: "Một nhân viên muốn tìm một công cụ AI chuyên ngành để hỗ trợ công việc kế toán của mình nhưng chưa biết bắt đầu từ đâu. Theo quy trình bốn bước tự tìm công cụ AI chuyên ngành, việc đầu tiên cần làm là gì?",
+    options: {
+      a: "Hỏi đồng nghiệp xem họ đang dùng công cụ nào rồi mua ngay gói trả phí của đúng công cụ đó",
+      b: "Xác định rõ một công việc lặp lại, tốn thời gian trong chính công việc kế toán của bản thân",
+      c: "Lập danh sách toàn bộ công cụ AI đang có trên thị trường rồi lần lượt dùng thử từng công cụ một",
+      d: "Đăng ký các khoá học về lập trình AI để đủ nền tảng kỹ thuật trước khi tiếp cận công cụ chuyên ngành"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 180,
+    chapter: 6,
+    text: "Một nhân viên dùng prompt: \"Hãy đóng vai chuyên viên nhân sự giàu kinh nghiệm. Công ty sắp tái cấu trúc phòng ban theo file đính kèm. Hãy soạn nội dung thông báo cho nhân viên.\" Kết quả trả về đúng nội dung nhưng là đoạn văn dài, trong khi công ty cần bảng ngắn gọn kèm mốc thời gian. Đối chiếu khung prompt Vai trò – Ngữ cảnh – Nhiệm vụ – Định dạng, lỗi của prompt này nằm ở đâu?",
+    options: {
+      a: "Thiếu thành phần Vai trò: prompt chưa cho AI biết cần đóng vai ai nên văn bản trả về không theo giọng điệu mong muốn",
+      b: "Thiếu thành phần Nhiệm vụ: prompt chưa nói rõ AI phải làm việc gì nên kết quả trả về lan man ngoài phạm vi yêu cầu",
+      c: "Thiếu thành phần Định dạng: prompt đã có vai trò, ngữ cảnh, nhiệm vụ nhưng không quy định hình thức trình bày đầu ra",
+      d: "Thiếu thành phần Ngữ cảnh: prompt không cung cấp thông tin nền nào về tình hình công ty nên AI phải tự suy diễn nội dung"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 181,
+    chapter: 6,
+    text: "Một sinh viên phản đối yêu cầu viết danh sách \"những việc tôi chủ động không giao cho AI\": \"ai cũng được dùng AI như nhau, vậy tự trói tay mình là bất lợi cạnh tranh\". Phản biện đúng với lập luận này là gì?",
+    options: {
+      a: "Vì ai cũng dùng được cùng công cụ, nên năng lực tự đọc, tự viết mới là điểm phân biệt",
+      b: "Vì quy định của nhà trường cấm sinh viên dùng AI cho phần đọc tài liệu và phần viết kết luận",
+      c: "Vì danh sách này chỉ là yêu cầu hình thức của học phần nên viết cho có rồi không cần thực hiện",
+      d: "Vì công cụ AI hiện còn khá đắt nên chưa thể dùng cho phần lớn đầu việc trong quá trình học"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 182,
+    chapter: 6,
+    text: "Một sinh viên vừa viết xong bản khai báo sử dụng AI cho dự án cuối kỳ và muốn tự đánh giá xem bản khai báo đã đạt chưa. Câu hỏi tự vấn nên đặt ra là gì?",
+    options: {
+      a: "Nếu bỏ hết phần AI hỗ trợ, phần còn lại có đủ cho thấy chính mình hiểu và làm chủ dự án hay chưa",
+      b: "Bản khai báo đã đủ ngắn để người chấm đọc lướt trong vài giây mà không phải dừng lại suy nghĩ hay chưa",
+      c: "Bản khai báo đã liệt kê được nhiều công cụ AI hơn so với bản khai báo của các bạn cùng lớp hay chưa",
+      d: "Bản khai báo đã dùng đủ các thuật ngữ chuyên môn về AI để thể hiện sự am hiểu công nghệ của mình hay chưa"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 183,
+    chapter: 6,
+    text: "Một trường học đã dùng trọn bộ ứng dụng văn phòng của một nhà cung cấp cho toàn bộ giảng viên, và cần một trợ lý AI hiểu được cả hình ảnh, video trong bài giảng. Căn cứ nào quyết định lựa chọn, và chọn thế nào?",
+    options: {
+      a: "Căn cứ chất lượng viết lách: chọn trợ lý viết tự nhiên nhất, vì đây là tiêu chí quan trọng nhất với giáo dục",
+      b: "Căn cứ độ rộng của kho tiện ích bên thứ ba: chọn trợ lý có nhiều tiện ích nhất để thay dần các ứng dụng hiện có",
+      c: "Căn cứ mức tích hợp với bộ ứng dụng đang dùng và khả năng xử lý đa phương thức: chọn trợ lý của nhà cung cấp đó",
+      d: "Căn cứ mức phổ biến: chọn trợ lý nhiều người dùng nhất rồi đổi dần, vì tiêu chí hệ sinh thái ít ảnh hưởng"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 184,
+    chapter: 6,
+    text: "So sánh ba vụ việc thực tế: công cụ tuyển dụng của Amazon ưu tiên hồ sơ nam giới, hệ thống chấm điểm rủi ro tái phạm COMPAS gán điểm rủi ro cao hơn cho bị cáo da đen, và Robert Williams bị bắt oan do nhận diện khuôn mặt kém chính xác với người da màu. Nguyên nhân gốc chung của cả ba vụ là gì?",
+    options: {
+      a: "Người vận hành ở cả ba tổ chức đã nhập sai dữ liệu đầu vào trong quá trình sử dụng hằng ngày, khiến các hệ thống vốn chính xác cho ra những kết quả bị sai lệch",
+      b: "Cả ba hệ thống được đưa vào dùng khi còn ở giai đoạn thử nghiệm nội bộ, nên các sai sót thuộc về quy trình phát hành phần mềm chứ không liên quan dữ liệu huấn luyện",
+      c: "Hệ thống AI học từ dữ liệu hoặc vận hành với độ chính xác không đồng đều giữa các nhóm người, tạo ra kết quả bất công dù không ai chủ ý lập trình sự phân biệt đó",
+      d: "Các kỹ sư của ba hệ thống đã cài đặt tường minh những quy tắc phân biệt đối xử vào phần mềm, và cả ba vụ chỉ bị phanh phui khi mã nguồn được công bố công khai"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 185,
+    chapter: 6,
+    text: "Năm 2024, một công cụ tạo ảnh AI lớn phải tạm dừng tính năng và xin lỗi vì tạo hình nhân vật lịch sử sai với sử liệu. Nhóm của Hà định dùng ảnh AI minh hoạ các nhân vật trong một sự kiện lịch sử cho poster triển lãm của khoa. Cách làm nào thể hiện đúng tinh thần dùng AI có trách nhiệm?",
+    options: {
+      a: "Ghi chú \"ảnh do AI tạo\" dưới mỗi ảnh, vì người xem đã được báo trước rằng ảnh có thể chưa chính xác",
+      b: "Chỉ dùng công cụ của hãng lớn nhất, vì các hãng lớn đã khắc phục lỗi này sau sự cố được công bố năm 2024",
+      c: "Đối chiếu từng ảnh với tư liệu lịch sử tin cậy, sửa hoặc bỏ ảnh sai lệch, và ghi rõ đây là ảnh do AI tạo",
+      d: "Tạo nhiều phiên bản cho mỗi nhân vật rồi chọn ảnh xuất hiện nhiều lần nhất, vì kết quả lặp lại đáng tin hơn"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 186,
+    chapter: 6,
+    text: "Sau khi kiểm chứng năm số liệu AI cung cấp, người viết xác minh được ba số, còn hai số không tìm thấy nguồn nào xác nhận. Theo bước cuối của quy trình kiểm chứng đầu ra AI, bản báo cáo nên được xử lý thế nào?",
+    options: {
+      a: "Chỉ đưa ba số liệu đã xác minh vào báo cáo, hai số còn lại loại bỏ hoặc ghi chú rõ chưa kiểm chứng được",
+      b: "Loại bỏ cả năm số liệu kể cả ba số đã xác minh, vì xuất xứ từ AI khiến chúng mất giá trị sử dụng",
+      c: "Đưa hai số chưa xác minh lên phần mở đầu cho ấn tượng, ba số đã xác minh xuống phần phụ lục",
+      d: "Đưa cả năm số liệu vào báo cáo vì tỷ lệ xác minh ba trên năm đã đủ đại diện cho độ tin cậy chung của cả nhóm"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 187,
+    chapter: 6,
+    text: "Một nhân viên thiết kế một agent soạn phản hồi báo giá gửi trực tiếp cho khách hàng qua email. Vận dụng nguyên tắc human-in-the-loop với nội dung hướng ra bên ngoài tổ chức, điểm phê duyệt của con người nên được đặt như thế nào?",
+    options: {
+      a: "Thay bước duyệt bằng một khối AI thứ hai kiểm tra lại văn bản của khối AI thứ nhất trước khi gửi đi tự động",
+      b: "Cho agent tạo bản nháp (draft) để nhân viên đọc, chỉnh sửa, rồi chính nhân viên bấm gửi cho khách hàng",
+      c: "Cho agent gửi email trước rồi nhân viên đọc lại sau, vì tốc độ phản hồi khách hàng cần được ưu tiên hàng đầu",
+      d: "Đặt bước duyệt ở đầu quy trình: nhân viên duyệt danh sách email đến, còn nội dung phản hồi thì agent tự gửi"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 188,
+    chapter: 6,
+    text: "Một sinh viên đã có bảng tổng hợp kèm trích dẫn do Gemini Notebook tạo và chuẩn bị hoàn thiện báo cáo đồ án. Để bảo đảm liêm chính học thuật, sinh viên nên làm gì với phần mở đầu và kết luận?",
+    options: {
+      a: "Copy nguyên văn phần AI viết nhưng in nghiêng cả đoạn để người chấm tự hiểu đó là phần của AI",
+      b: "Nhờ AI viết cả hai phần rồi đổi vài từ đồng nghĩa, vì cách này vẫn được tính là tự diễn đạt",
+      c: "Bỏ hẳn hai phần mở đầu và kết luận khỏi báo cáo để không phải xử lý vấn đề nguồn gốc câu chữ",
+      d: "Tự viết bằng lời văn riêng, chỉ dùng bảng tổng hợp của AI làm khung xương cho nội dung chính"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 189,
+    chapter: 6,
+    text: "Để nhờ AI giải một bài toán thuỷ lực nhiều bước mà vẫn tự dò lại được chỗ sai, một sinh viên gửi kèm hai bài giải mẫu của thầy (chỉ ghi đáp số cuối) rồi yêu cầu \"giải theo phong cách này\"; AI cũng chỉ trả về đáp số cuối. Lỗi chọn kỹ thuật prompt ở đây là gì?",
+    options: {
+      a: "Dùng quá ít ví dụ mẫu, vì few-shot chỉ phát huy tác dụng với các bài toán tính toán kỹ thuật khi số lượng ví dụ gửi kèm đạt tối thiểu năm bài giải mẫu hoàn chỉnh trở lên",
+      b: "Chưa chia thành prompt chuỗi, vì bài toán kỹ thuật nhiều bước phải được tách thành nhiều lượt hỏi nối tiếp thì AI mới có thể xử lý được phép tính",
+      c: "Quên dùng negative prompting, vì cấm AI đưa đáp số trần là cách đủ để nó tự chuyển sang trình bày chi tiết các bước suy luận trung gian của lời giải",
+      d: "Dùng few-shot vốn nhắm vào phong cách và định dạng, trong khi nhu cầu dò lại từng phép tính đòi hỏi chain-of-thought – yêu cầu AI trình bày rõ từng bước suy luận"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 190,
+    chapter: 6,
+    text: "Một sinh viên có hai việc: (1) tổng hợp nội dung từ đúng 12 tệp tài liệu của môn học, cần trích dẫn được về từng tệp; (2) tìm hiểu một chủ đề chưa biết gì để có định hướng ban đầu. Nên dùng công cụ chỉ trả lời dựa trên tài liệu người dùng tải lên hay chatbot thông thường cho từng việc?",
+    options: {
+      a: "Cả hai việc dùng công cụ giới hạn trong tài liệu đã tải lên, vì câu trả lời có trích dẫn thì đáng tin hơn",
+      b: "Việc (1) dùng chatbot để có thêm thông tin ngoài mười hai tệp, việc (2) dùng công cụ giới hạn cho dễ hiểu",
+      c: "Cả hai việc dùng chatbot phạm vi rộng, vì nó biết nhiều hơn nên trả lời việc nào cũng tốt hơn công cụ kia",
+      d: "Việc (1) dùng công cụ giới hạn trong tài liệu tải lên, việc (2) dùng chatbot để có phạm vi rộng khi định hướng"
+    },
+    correctAnswer: "d"
+  },
+  {
+    id: 191,
+    chapter: 6,
+    text: "Một bản tổng hợp do AI viết gồm bốn thành phần: một con số thống kê, một trích dẫn có tên tác giả, một câu diễn giải khái niệm và một khuyến nghị hành động. Nếu chỉ đủ thời gian kiểm chứng HAI thành phần, nên chọn hai thành phần nào?",
+    options: {
+      a: "Con số thống kê và trích dẫn có tên tác giả, vì đây là hai loại dễ bị sinh sai mà lại được coi là bằng chứng",
+      b: "Trích dẫn có tên tác giả và khuyến nghị hành động, vì đây là hai phần người đọc chú ý nhất khi đọc nhanh",
+      c: "Câu diễn giải khái niệm và khuyến nghị hành động, vì đây là phần thể hiện chất lượng tư duy của bản tổng hợp",
+      d: "Con số thống kê và câu diễn giải khái niệm, vì cả hai đều tra lại được nhanh trong giáo trình của môn học"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 192,
+    chapter: 6,
+    text: "Theo so sánh giữa các công cụ tổng hợp tài liệu tại thời điểm 2026, phương án ChatGPT đính kèm file có nhược điểm trích dẫn kém chính xác hơn, chỉ phù hợp cho hỏi đáp nhanh và brainstorm quanh tài liệu. Nhóm đồ án phải nộp bản tổng quan từ 5 tài liệu với yêu cầu mọi luận điểm đều có trích dẫn kiểm chứng được; nhóm trưởng vẫn quyết định dùng ChatGPT kèm tính năng đính kèm file \"vì nó phổ biến nhất, cả nhóm đều quen dùng\". Quyết định này có lỗi gì?",
+    options: {
+      a: "Chọn công cụ thiếu khả năng hội thoại linh hoạt, vì công cụ này thuộc nhóm chỉ phù hợp với các tác vụ tra cứu số liệu mới từ nguồn web bên ngoài",
+      b: "Chọn công cụ xử lý được quá ít tài liệu, vì tính năng đính kèm file của công cụ này chỉ tiếp nhận được tối đa hai tài liệu cho mỗi một phiên làm việc",
+      c: "Chọn công cụ theo độ quen thuộc thay vì đối chiếu đặc tính với yêu cầu cốt lõi: bài đòi trích dẫn kiểm chứng được, đúng khâu công cụ được chọn đang yếu",
+      d: "Chọn công cụ có chi phí cao nhất trong các phương án tổng hợp tài liệu, vì tiêu chí quan trọng hàng đầu với bài tập nhóm của sinh viên là mức phí sử dụng công cụ thấp"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 193,
+    chapter: 6,
+    text: "Gemini Notebook trả về bảng tổng hợp với các chip trích dẫn ở từng luận điểm. Trước khi sử dụng, độ tin cậy của bảng nên được xác nhận bằng cách nào?",
+    options: {
+      a: "Đọc lướt bảng một lần, thấy văn phong mạch lạc trôi chảy là đủ căn cứ xác nhận độ tin cậy",
+      b: "Yêu cầu công cụ tự xác nhận lại rằng mọi trích dẫn trong bảng đều được lấy đúng từ nguồn đã nạp",
+      c: "Bấm vào từng chip trích dẫn để xem nó mở đúng đoạn trong văn bản gốc và nội dung có khớp không",
+      d: "Đếm xem có đủ số chip trích dẫn trên mỗi dòng hay chưa, đủ số lượng nghĩa là nội dung chính xác"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 194,
+    chapter: 6,
+    text: "Ở mức nhập môn, công việc quản trị việc sử dụng AI trong một tổ chức gồm bốn phần. Nhóm bốn phần nào mô tả đúng?",
+    options: {
+      a: "Chính sách sử dụng AI nội bộ; danh mục công cụ được phép; quy trình đánh giá rủi ro trước khi đưa công cụ vào dùng; người chịu trách nhiệm về dữ liệu",
+      b: "Mua bản quyền công cụ AI cho các phòng ban; tổ chức thi sát hạch kỹ năng AI hằng năm; xếp hạng nhân viên theo tần suất dùng AI; công bố báo cáo năng suất hằng quý",
+      c: "Cài phần mềm giám sát trên máy nhân viên; chặn truy cập các trang web có công cụ AI; lưu lịch sử hội thoại của nhân viên; xử lý kỷ luật các trường hợp vi phạm",
+      d: "Huấn luyện lại mô hình trên dữ liệu nội bộ; tối ưu chi phí token; xây dựng hạ tầng máy chủ riêng; tuyển dụng kỹ sư học máy cho từng phòng ban"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 195,
+    chapter: 6,
+    text: "Một agent thu thập giá sản phẩm từ web và ghi vào bảng tính đã chạy thử xong: bảng có đủ 200 dòng, không báo lỗi. Cách kiểm chứng nào đủ để kết luận agent chạy đúng trước khi cho chạy hằng ngày?",
+    options: {
+      a: "Chạy lại agent lần thứ hai và so hai bảng, vì hai lần chạy cho kết quả giống nhau thì dữ liệu đã chính xác",
+      b: "Xem nhật ký chạy của agent để chắc rằng không bước nào bị bỏ qua, vì nhật ký phản ánh đúng những gì đã diễn ra",
+      c: "Mở hai ba dòng bất kỳ rồi tự vào trang gốc so giá, vì không báo lỗi chỉ nghĩa là ghi được, chưa nghĩa là ghi đúng",
+      d: "Kiểm tra bảng có đủ 200 dòng và không dòng nào trống, vì đủ số dòng cho thấy agent đã đọc hết danh sách sản phẩm"
+    },
+    correctAnswer: "c"
+  },
+  {
+    id: 196,
+    chapter: 6,
+    text: "AI viết cho sinh viên một đoạn mã dọn dữ liệu, chạy trực tiếp trên tệp gốc và ghi đè kết quả lên chính tệp đó. Mã chạy không báo lỗi nào. Điểm cần xử lý trước khi dùng cho dữ liệu thật là gì?",
+    options: {
+      a: "Mã ghi đè tệp gốc nên không hoàn tác được, phải chạy trên bản sao và đối soát số bản ghi trước sau",
+      b: "Mã đã chạy mà không báo lỗi nào, nên logic đã đúng với dữ liệu đầu vào và dùng được cho dữ liệu thật",
+      c: "Mã không do người học tự viết ra, nên phải xin phép giảng viên trước khi dùng cho bài tập của môn học",
+      d: "Mã do công cụ viết thường chưa tối ưu về tốc độ, nên phải chỉnh lại trước khi chạy với bộ dữ liệu lớn"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 197,
+    chapter: 6,
+    text: "Giả sử NotebookLM/Gemini Notebook thay đổi mạnh về tính năng và người học phải tìm một công cụ khác cho các bài tổng hợp tài liệu cần trích dẫn kiểm chứng được. Công cụ thay thế nên được ưu tiên theo tiêu chí nào?",
+    options: {
+      a: "Có tính năng grounding – chỉ trả lời dựa trên tài liệu nguồn – và có khả năng trích dẫn tự động",
+      b: "Có kho tích hợp nhiều ứng dụng bên thứ ba, vì càng nhiều tích hợp thì khả năng chống ảo giác càng mạnh",
+      c: "Có lượng người dùng đông nhất thị trường, vì cộng đồng lớn bảo đảm chất lượng trích dẫn của công cụ",
+      d: "Có tốc độ sinh văn bản nhanh nhất, vì thời gian phản hồi là yếu tố quyết định với bài tổng hợp tài liệu"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 198,
+    chapter: 6,
+    text: "Một người học đã ghi lại các prompt hiệu quả trong hai tuần và chọn ra những prompt tốt nhất. Bước tiếp theo để xây thư viện prompt cá nhân là gì?",
+    options: {
+      a: "Đăng công khai các prompt lên mạng xã hội để cộng đồng chấm điểm giúp trước khi lưu trữ",
+      b: "Chuẩn hoá mỗi prompt thành mẫu có chỗ trống để điền thông tin thay đổi, rồi lưu vào tài liệu riêng",
+      c: "Học thuộc lòng từng prompt để gõ lại từ trí nhớ, vì lưu ra tài liệu làm giảm kỹ năng viết",
+      d: "Xoá toàn bộ prompt cũ đi và viết lại hoàn toàn từ đầu mỗi khi phát sinh nhiệm vụ mới cho thật sáng tạo"
+    },
+    correctAnswer: "b"
+  },
+  {
+    id: 199,
+    chapter: 6,
+    text: "Tài khoản trường học của một sinh viên bị giới hạn nên không truy cập được công cụ notebook chuyên tổng hợp có trích dẫn mà lớp hướng dẫn, trong khi bài tổng hợp tài liệu có trích dẫn nguồn vẫn phải hoàn thành đúng hạn. Nguyên tắc ứng phó đúng khi chọn phương án dự phòng là gì?",
+    options: {
+      a: "Chọn công cụ nạp trực tiếp được tài liệu, chấp nhận trích dẫn kém chính xác hơn và bù bằng tự kiểm chứng kỹ",
+      b: "Chờ đến khi nhà trường mở lại quyền truy cập rồi mới làm bài, vì mọi công cụ khác đều cho kết quả sai lệch hoàn toàn",
+      c: "Gõ lại thủ công từng trang tài liệu vào ô chat, vì các công cụ dự phòng đều không có cách nào nạp được tài liệu nguồn",
+      d: "Bỏ yêu cầu trích dẫn nguồn của bài tổng hợp, vì yêu cầu này chỉ thực hiện được trên đúng công cụ chuyên dụng ban đầu"
+    },
+    correctAnswer: "a"
+  },
+  {
+    id: 200,
+    chapter: 6,
+    text: "AI trình bày lời giải năm bước cho một bài tính, kết quả cuối lệch so với đáp số đúng. Cách dùng lời giải đó để tìm nguyên nhân hiệu quả nhất là gì?",
+    options: {
+      a: "Yêu cầu AI tự chỉ ra bước nào sai trong lời giải của nó, vì mô hình đọc lại được lập luận của chính mình",
+      b: "Tự tính lại từng bước theo thứ tự và dừng ở bước đầu tiên bị lệch, vì các bước sau thừa hưởng sai số của nó",
+      c: "Bắt đầu kiểm từ bước cuối trở về trước, vì bước cuối gần với kết quả sai nên thường là bước chứa lỗi gốc",
+      d: "So lời giải này với lời giải của một mô hình khác và chọn phần hai bên trùng nhau làm phần đã đúng"
+    },
+    correctAnswer: "b"
+  }
+];
+
+export default function App() {
+  const [answers, setAnswers] = useState({}); // { [questionId]: 'a' | 'b' | 'c' | 'd' }
+  const [selectedChapter, setSelectedChapter] = useState('ALL'); // 'ALL' | 1 | 2 | 3 | 4 | 5 | 6
+  const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'UNANSWERED' | 'CORRECT' | 'WRONG'
+  const [currentPage, setCurrentPage] = useState(1);
+  const questionsPerPage = 10;
+
+  // Lọc danh sách câu hỏi dựa trên Chương và Trạng thái trả lời
+  const filteredQuestions = useMemo(() => {
+    return QUESTIONS_DATA.filter(q => {
+      // Lọc theo chương
+      if (selectedChapter !== 'ALL' && q.chapter !== Number(selectedChapter)) {
+        return false;
+      }
+
+      // Lọc theo trạng thái
+      const userAnswer = answers[q.id];
+      if (statusFilter === 'UNANSWERED' && userAnswer) return false;
+      if (statusFilter === 'CORRECT' && userAnswer !== q.correctAnswer) return false;
+      if (statusFilter === 'WRONG' && (!userAnswer || userAnswer === q.correctAnswer)) return false;
+
+      return true;
+    });
+  }, [answers, selectedChapter, statusFilter]);
+
+  // Phân trang
+  const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage) || 1;
+  const currentQuestions = useMemo(() => {
+    const start = (currentPage - 1) * questionsPerPage;
+    return filteredQuestions.slice(start, start + questionsPerPage);
+  }, [filteredQuestions, currentPage]);
+
+  // Thống kê số liệu
+  const attemptedCount = Object.keys(answers).length;
+  const correctCount = useMemo(() => {
+    return QUESTIONS_DATA.filter(q => answers[q.id] === q.correctAnswer).length;
+  }, [answers]);
+  const wrongCount = attemptedCount - correctCount;
+
+  // Chọn đáp án
+  const handleSelectOption = (questionId, optionKey) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: optionKey
+    }));
+  };
+
+  // Đặt lại dữ liệu từ đầu
+  const handleReset = () => {
+    if (window.confirm('Bạn có chắc chắn muốn làm lại tất cả 200 câu hỏi?')) {
+      setAnswers({});
+      setCurrentPage(1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleChapterChange = (e) => {
+    const val = e.target.value === 'ALL' ? 'ALL' : Number(e.target.value);
+    setSelectedChapter(val);
+    setCurrentPage(1);
+  };
+
+  const handleStatusFilterChange = (status) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-100 text-slate-800 font-sans pb-16">
+      {/* Sticky Top Header */}
+      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-blue-600 p-2 rounded-xl text-white shadow-sm">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="font-bold text-slate-900 text-lg leading-tight">
+                Ôn Tập Trắc Nghiệm Năng Lực Số
+              </h1>
+              <p className="text-xs text-slate-500">200 Câu Đáp Án Chuẩn (Học kỳ 1, 2026-2027)</p>
+            </div>
+          </div>
+
+          {/* Thống kê nhanh */}
+          <div className="flex items-center gap-2 text-sm">
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <span className="px-3 py-1 font-semibold text-slate-700">
+                Đã làm: <strong className="text-blue-600">{attemptedCount}</strong>/200
+              </span>
+              <span className="px-3 py-1 font-semibold text-green-700 border-l border-slate-300">
+                Đúng: {correctCount}
+              </span>
+              <span className="px-3 py-1 font-semibold text-red-600 border-l border-slate-300">
+                Sai: {wrongCount}
+              </span>
+            </div>
+            
+            <button
+              onClick={handleReset}
+              title="Làm lại từ đầu"
+              className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors border border-slate-200"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Thanh Tiến Độ */}
+        <div className="w-full bg-slate-200 h-1.5">
+          <div
+            className="bg-blue-600 h-full transition-all duration-300"
+            style={{ width: `${(attemptedCount / 200) * 100}%` }}
+          />
+        </div>
+      </header>
+
+      {/* Main Container */}
+      <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+        
+        {/* Bộ Lọc Chương và Trạng Thái */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* Lọc Chương */}
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <Filter className="w-4 h-4 text-slate-500" />
+            <span className="text-sm font-semibold text-slate-700 whitespace-nowrap">Chương:</span>
+            <select
+              value={selectedChapter}
+              onChange={handleChapterChange}
+              className="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2 w-full md:w-64 font-medium"
+            >
+              <option value="ALL">Tất cả các chương (200 câu)</option>
+              <option value="1">Chương 1: Nhập môn năng lực số & môi trường số</option>
+              <option value="2">Chương 2: Khai thác dữ liệu & thông tin</option>
+              <option value="3">Chương 3: Giao tiếp & hợp tác môi trường số</option>
+              <option value="4">Chương 4: Sáng tạo nội dung số</option>
+              <option value="5">Chương 5: An toàn thông tin & đạo đức số</option>
+              <option value="6">Chương 6: Ứng dụng AI & giải quyết vấn đề</option>
+            </select>
+          </div>
+
+          {/* Lọc Trạng Thái */}
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200 w-full md:w-auto justify-center">
+            {[
+              { id: 'ALL', label: 'Tất cả' },
+              { id: 'UNANSWERED', label: 'Chưa làm' },
+              { id: 'CORRECT', label: 'Đã đúng' },
+              { id: 'WRONG', label: 'Đã sai' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => handleStatusFilterChange(tab.id)}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                  statusFilter === tab.id
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Thông báo nếu không tìm thấy câu hỏi */}
+        {filteredQuestions.length === 0 && (
+          <div className="bg-white p-8 rounded-xl text-center border border-slate-200 text-slate-500">
+            <AlertCircle className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+            <p className="font-medium">Không tìm thấy câu hỏi nào phù hợp với bộ lọc hiện tại.</p>
+          </div>
+        )}
+
+        {/* Danh Sách Câu Hỏi */}
+        <div className="space-y-6">
+          {currentQuestions.map((q) => {
+            const userAnswer = answers[q.id];
+            const isAnswered = !!userAnswer;
+
+            return (
+              <div
+                key={q.id}
+                className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 md:p-6 transition-all hover:border-slate-300"
+              >
+                <div className="flex items-start gap-3 mb-4">
+                  <span className="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg text-sm flex-shrink-0">
+                    Câu {q.id}
+                  </span>
+                  <div className="flex-1">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                      Chương {q.chapter}
+                    </span>
+                    <h3 className="text-slate-900 font-medium text-base md:text-lg leading-relaxed">
+                      {q.text}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Các Đáp Án */}
+                <div className="space-y-3">
+                  {['a', 'b', 'c', 'd'].map((key) => {
+                    const isSelected = userAnswer === key;
+                    const isCorrectKey = q.correctAnswer === key;
+
+                    // Style logic đúng sai trực quan
+                    let buttonStyle = "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300";
+
+                    if (isAnswered) {
+                      if (isCorrectKey) {
+                        buttonStyle = "bg-green-50 border-green-500 text-green-900 font-medium shadow-sm ring-1 ring-green-400";
+                      } else if (isSelected && !isCorrectKey) {
+                        buttonStyle = "bg-red-50 border-red-500 text-red-900 font-medium shadow-sm";
+                      } else {
+                        buttonStyle = "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
+                      }
+                    }
+
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => handleSelectOption(q.id, key)}
+                        className={`w-full text-left p-4 rounded-xl border transition-all flex items-start gap-3 ${buttonStyle}`}
+                      >
+                        <span
+                          className={`uppercase font-bold w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5 ${
+                            isAnswered && isCorrectKey
+                              ? 'bg-green-600 text-white'
+                              : isAnswered && isSelected && !isCorrectKey
+                              ? 'bg-red-600 text-white'
+                              : 'bg-slate-200 text-slate-700'
+                          }`}
+                        >
+                          {key}
+                        </span>
+                        <span className="flex-1 text-sm md:text-base leading-relaxed">
+                          {q.options[key]}
+                        </span>
+                        {isAnswered && isCorrectKey && (
+                          <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        )}
+                        {isAnswered && isSelected && !isCorrectKey && (
+                          <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Phân Trang */}
+        {filteredQuestions.length > 0 && (
+          <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm mt-8">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => {
+                setCurrentPage(p => p - 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="flex items-center gap-1.5 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium text-sm hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Trang trước</span>
+            </button>
+
+            <span className="text-sm font-semibold text-slate-700">
+              Trang {currentPage} / {totalPages}
+            </span>
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => {
+                setCurrentPage(p => p + 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+            >
+              <span>Trang tiếp</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
